@@ -6,6 +6,9 @@ class EstacionesProvider with ChangeNotifier {
   List<Map<String, dynamic>> _estaciones = [];
 
   List<Map<String, dynamic>> get estaciones => _estaciones;
+  List<String> get estacionesNombres {
+    return _estaciones.map((e) => e['estacion'].toString()).toList();
+  }
 
   // FUNCION PARA MOSTRAR LAS ESTACIONES
   Future<void> fetchEstaciones() async {

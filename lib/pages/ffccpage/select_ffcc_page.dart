@@ -153,7 +153,7 @@ class _SelectFCState extends State<SelectFC> {
         ),
       ),
       child: const Text(
-        'Ejecutar',
+        'Ingresar',
         style: TextStyle(color: Colors.white, fontSize: 12.0),
       ),
     );

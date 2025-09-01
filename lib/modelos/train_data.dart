@@ -12,6 +12,7 @@ class TrainData {
   final String llamado;
   final String ofrecido;
   final String ofrecidoPor;
+  final String autorizadorPor;
   final String validado;
   final String ultimaEstacion;
   final String estacionActual;
@@ -19,6 +20,8 @@ class TrainData {
   final int cargados;
   final int carros;
   final int vacios;
+  final String validado_por;
+  final String observaciones;
 
   TrainData({
     required this.id,
@@ -38,9 +41,12 @@ class TrainData {
     required this.ultimaEstacion,
     required this.estacionActual,
     required this.fechaLlamado,
+    required this.observaciones,
     required this.cargados,
     required this.carros,
     required this.vacios,
+    required this.validado_por,
+    required this.autorizadorPor
   });
 
   factory TrainData.fromJson(Map<String, dynamic> json) {
@@ -66,6 +72,9 @@ class TrainData {
       cargados: data['cargados'] ?? 0,
       carros: data['carros'] ?? 0,
       vacios: data['vacios'] ?? 0,
+      validado_por: data['validado_por'] ?? 0,
+      autorizadorPor: data['autorizado_por'] ?? '',
+      observaciones: data['observaciones'] ?? ''    
     );
   }
 }

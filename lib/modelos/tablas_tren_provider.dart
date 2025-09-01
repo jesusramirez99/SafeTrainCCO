@@ -1,27 +1,31 @@
+import 'dart:convert';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
-
 import 'package:safe_train_cco/modelos/train_data.dart';
 
 class TablesTrainsProvider extends ChangeNotifier {
   TrainData? _trainData;
   List<Map<String, dynamic>> _infoTrain = [];
-
+  List<Map<String, dynamic>> _dataTrainsOffered = [];
   List<Map<String, dynamic>> _dataTrain = [];
 
   List<Map<String, dynamic>> get dataTrain => _dataTrain;
+  List<Map<String, dynamic>> get dataTrainsOffered => _dataTrainsOffered;
 
   String? _selectedID;
   bool _isLoading = false;
+  bool _trainDataInfo = false;
 
   TrainData? get trainData => _trainData;
   bool get isLoading => _isLoading;
+  bool get trainDataInfo => _trainDataInfo;
   String? get selectedID => _selectedID;
 
   int _rowsPerPage = 10;
   List<Map<String, dynamic>> get infoTrain => _infoTrain;
+  Map<String, dynamic>? get firstTrain => _dataTrain.isNotEmpty ? _dataTrain.first : null;
   int get rowsPerPage => _rowsPerPage;
 
   void setSelectedID(String id) {
@@ -31,11 +35,41 @@ class TablesTrainsProvider extends ChangeNotifier {
 
   void clearData() {
     _trainData = null;
+    _dataTrain = [];
     notifyListeners();
+  }
+
+  //FUNCION PARA MOSTRAR LOS DATOS DE TRENES OFRECIDOS
+  Future<void> tableTrainsOffered(BuildContext context, String user) async{
+    _isLoading = true;
+    try{
+        final url = Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getOfreciomientosCCOLista?userId=$user');
+        final response = await http.get(url);
+
+        if(response.statusCode == 200){
+          final Map<String, dynamic> jsonData = json.decode(response.body);
+
+          if (jsonData['Lista'] != null &&
+              jsonData['Lista']['wrapper'] != null &&
+              jsonData['Lista']['wrapper'] is List) {
+            
+            final List<dynamic> wrapper = jsonData['Lista']['wrapper'];
+
+            _dataTrainsOffered.clear();
+            _dataTrainsOffered.addAll(wrapper.map((e) => e as Map<String, dynamic>));
+          }
+        }
+    }catch(e){
+        print('error: $e');
+    }finally{
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   Future<void> tableDataTrain(BuildContext context, String idTren) async {
     _isLoading = true;
+    _trainDataInfo = false;
     notifyListeners();
 
     final url =
@@ -49,16 +83,20 @@ class TablesTrainsProvider extends ChangeNotifier {
 
         if (data != null && data is Map<String, dynamic> && data.isNotEmpty) {
           _trainData = TrainData.fromJson(data);
+          _trainDataInfo = true;
         } else {
           _trainData = null;
+          _trainDataInfo = false;
           print('El tren no fue encontrado.');
         }
       } else {
         throw Exception('Failed to load train info');
+        
       }
     } catch (e) {
       print('Error fetching train info: $e');
       _trainData = null;
+      //_trainDataInfo = false;
     } finally {
       _isLoading = false;
       notifyListeners();
