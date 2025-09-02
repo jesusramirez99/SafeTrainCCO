@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class AutorizarTrenProvider with ChangeNotifier {
   bool _isLoading = false;
@@ -18,7 +20,7 @@ class AutorizarTrenProvider with ChangeNotifier {
     required String fechaLlamado,
   }) async {
     final url =
-        Uri.parse("http://10.10.76.150/TrenSeguroDev/api/autorizarTren");
+        Uri.parse("${Enviroment.baseUrl}/autorizarTren");
 
     final Map<String, dynamic> requestBody = {
       "ID": id,

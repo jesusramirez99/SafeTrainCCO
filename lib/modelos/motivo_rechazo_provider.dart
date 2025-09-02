@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class MotivoRechazoProvider with ChangeNotifier {
   List<Map<String, dynamic>> _motivosRechazo = [];
@@ -9,7 +10,7 @@ class MotivoRechazoProvider with ChangeNotifier {
 
   // Método para cargar los datos
   Future<void> cargarMotivosRechazo() async {
-    const url = 'http://10.10.76.150/TrenSeguroDev/api/getMotivoRecahzo';
+    const url = '${Enviroment.baseUrl}/getMotivoRecahzo';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {

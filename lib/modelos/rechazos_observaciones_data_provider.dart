@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class RechazosObservacionesData with ChangeNotifier {
   List<String> _motivosRechazo = [];
@@ -11,7 +12,7 @@ class RechazosObservacionesData with ChangeNotifier {
 
   Future<void> fetchHistorico(int id) async {
     final url = Uri.parse(
-        "http://10.10.76.150/TrenSeguroDev/api/getHistoricoDataVal?id=$id");
+        "${Enviroment.baseUrl}/getHistoricoDataVal?id=$id");
 
     try {
       final response = await http.get(url);

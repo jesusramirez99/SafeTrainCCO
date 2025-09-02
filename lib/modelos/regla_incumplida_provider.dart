@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 import 'dart:convert';
 import 'regla_incumplida_model.dart';
 
@@ -16,7 +17,7 @@ class ReglaIncumplidaProvider with ChangeNotifier {
     notifyListeners();
 
     final url = Uri.parse(
-        'http://10.10.76.150/TrenSeguroDev/api/getReglaIncumplida?idRegla=$idRegla');
+        '${Enviroment.baseUrl}/getReglaIncumplida?idRegla=$idRegla');
 
     try {
       final response = await http.get(url);

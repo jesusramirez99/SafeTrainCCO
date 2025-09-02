@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class RechazoTrenProvider with ChangeNotifier {
-  final String _baseUrl = "http://10.10.76.150/TrenSeguroDev/api/rechazarTren";
+  final String _baseUrl = "${Enviroment.baseUrl}/rechazarTren";
 
   Future<void> rechazarTren({
     required int id,

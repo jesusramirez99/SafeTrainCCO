@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 import 'package:safe_train_cco/modelos/train_data.dart';
 
 class TablesTrainsProvider extends ChangeNotifier {
@@ -43,7 +44,7 @@ class TablesTrainsProvider extends ChangeNotifier {
   Future<void> tableTrainsOffered(BuildContext context, String user) async{
     _isLoading = true;
     try{
-        final url = Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getOfreciomientosCCOLista?userId=$user');
+        final url = Uri.parse('${Enviroment.baseUrl}/getOfreciomientosCCOLista?userId=$user');
         final response = await http.get(url);
 
         if(response.statusCode == 200){
@@ -73,7 +74,7 @@ class TablesTrainsProvider extends ChangeNotifier {
     notifyListeners();
 
     final url =
-        'http://10.10.76.150/TrenSeguroDev/api/getInfoTrenCCOOfrecido?idTren=$idTren';
+        '${Enviroment.baseUrl}/getInfoTrenCCOOfrecido?idTren=$idTren';
 
     try {
       final response = await http.get(Uri.parse(url));
@@ -128,7 +129,7 @@ class TablesTrainsProvider extends ChangeNotifier {
 
     try {
       final url = Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getDataTren?idTren=$train&estacion=$estacion');
+          '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(url);
 
       if (response.statusCode == 200) {
@@ -180,7 +181,7 @@ class TablesTrainsProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final response = await http.get(Uri.parse(
-          'http://10.10.76.150/TrenSeguroDev/api/getConsist?idTren=$train&estacion=$estacion'));
+          '${Enviroment.baseUrl}/getConsist?idTren=$train&estacion=$estacion'));
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonData = json.decode(response.body);
         _infoTrain =

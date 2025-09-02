@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async'; // Necesario para el Timer
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class OfrecimientosProvider with ChangeNotifier {
   List<String> _trenesOfrecidos = [];
@@ -26,7 +27,7 @@ class OfrecimientosProvider with ChangeNotifier {
 
   Future<void> fetchOfrecimientos(BuildContext context, String user) async {
     String url =
-        'http://10.10.76.150/TrenSeguroDev/api/getOfreciomientosCCOUser?userId=$user';
+        '${Enviroment.baseUrl}/getOfreciomientosCCOUser?userId=$user';
 
     _isLoading = true;
     _errorMessage = null;

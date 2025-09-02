@@ -2,6 +2,7 @@ import 'dart:html' as html;
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class ExcelDownloadProvider extends ChangeNotifier {
   bool _isDownloading = false;
@@ -16,7 +17,7 @@ class ExcelDownloadProvider extends ChangeNotifier {
     notifyListeners();
 
     final url =
-        'http://10.10.76.150/TrenSeguroDev/api/DescargarExcel?idTren=$idTren&estacion=$estacion';
+        '${Enviroment.baseUrl}/DescargarExcel?idTren=$idTren&estacion=$estacion';
 
     try {
       final response = await http.get(Uri.parse(url));

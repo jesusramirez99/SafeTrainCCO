@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class LoginProviderCCO with ChangeNotifier {
   bool _isLoading = false;
@@ -24,7 +25,7 @@ class LoginProviderCCO with ChangeNotifier {
 
     try {
       final response = await http.post(
-        Uri.parse('http://10.10.76.150/TrenSeguroDev/api/getLoginCCO'),
+        Uri.parse('${Enviroment.baseUrl}/getLoginCCO'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode({'USER_NAME': userName, 'PASSWORD': password}),
       );

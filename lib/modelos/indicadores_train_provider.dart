@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:safe_train_cco/config/enviroments.dart';
 
 class IndicatorTrainProvider with ChangeNotifier {
   List<Map<String, dynamic>> _indicatorTrain = [];
@@ -16,7 +17,7 @@ class IndicatorTrainProvider with ChangeNotifier {
     Future.microtask(() => notifyListeners());
 
     final url =
-        'http://10.10.76.150/TrenSeguroDev/api/obtenerIndicadoresTren?idTren=$idTren&estacion_actual=$estacionActual';
+        '${Enviroment.baseUrl}/obtenerIndicadoresTren?idTren=$idTren&estacion_actual=$estacionActual';
 
     try {
       final response = await http.get(Uri.parse(url));
