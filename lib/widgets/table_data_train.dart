@@ -240,7 +240,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //DataColumn(label: _buildHeaderCell('Autorizado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
+      DataColumn(label: _buildHeaderCell('Registro de \nSalida'))
     ];
   }
 
@@ -315,7 +315,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       //Fecha Ofrecido
       _buildCellDateStringObservations(
-        messageObservations: train.observaciones ?? '',
+        messageObservations: train.observ_ofrecimiento ?? '',
         context: context,
         text: train.ofrecidoPor.toString() ?? '', 
         widget: formattedDateCell(
@@ -362,9 +362,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       _buildCellDateString(
-        text: train.llamadoPor.toString() ?? '', 
+        text: '', 
         widget: formattedDateCell(
-          date: train.fechaLlamado ?? '',
+          date: '',
           format: 'dd/MM/yyyy \n HH:mm',
         )
       ),
@@ -570,7 +570,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
       DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
       DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Llamada\nCompletada'))
+      DataColumn(label: _buildHeaderCell('Registro de \nSalida'))
     ];
   }
 
@@ -699,9 +699,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: '', 
         widget: formattedDateCellTrainsOffered(
-          date: data['fecha_llamado']?.toString() ?? '',
+          date: '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
@@ -779,7 +779,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
     required String text,
     required Widget widget,
     Color textColor = Colors.black,
-    BuildContext? context,
+    required BuildContext context,
     
   }) {
     return DataCell(
@@ -787,39 +787,36 @@ class _DataTrainTableState extends State<DataTrainTable> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
-          
           children: [
             widget,
-              Tooltip(
-              child: InkWell(
-                onTap: () {
-                  if (context != null) {
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text("Observaciones"),
-                        content: Text(
-                          messageObservations.isEmpty ? 'Sin Observaciones' : messageObservations,
-                        ),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("Cerrar"),
-                          ),
-                        ],
+            GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Observaciones"),
+                    content: Text(
+                      messageObservations.isEmpty
+                          ? 'Sin Observaciones'
+                          : messageObservations,
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text("Cerrar"),
                       ),
-                    );
-                  }
-                },
-                child: Text(
-                  text,
-                  style: TextStyle(
-                    fontSize: 15.0,
-                    fontWeight: FontWeight.bold,
-                    color: textColor,
+                    ],
                   ),
-                  textAlign: TextAlign.center,
+                );
+              },
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 15.0,
+                  fontWeight: FontWeight.bold,
+                  color: textColor,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
           ],

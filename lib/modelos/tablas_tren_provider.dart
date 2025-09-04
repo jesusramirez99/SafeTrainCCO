@@ -37,6 +37,7 @@ class TablesTrainsProvider extends ChangeNotifier {
   void clearData() {
     _trainData = null;
     _dataTrain = [];
+    _trainDataInfo = false;
     notifyListeners();
   }
 

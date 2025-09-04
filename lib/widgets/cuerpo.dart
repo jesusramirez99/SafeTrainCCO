@@ -241,7 +241,7 @@ class CuerpoState extends State<Cuerpo> {
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                _iconCompareConsist(context),
+                                //_iconCompareConsist(context),
                                 const SizedBox(width: 20.0),
                                 iconPrint(context),
                                 const SizedBox(width: 45.0),

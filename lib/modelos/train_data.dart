@@ -22,6 +22,7 @@ class TrainData {
   final int vacios;
   final String validado_por;
   final String observaciones;
+  final String observ_ofrecimiento;
 
   TrainData({
     required this.id,
@@ -46,7 +47,8 @@ class TrainData {
     required this.carros,
     required this.vacios,
     required this.validado_por,
-    required this.autorizadorPor
+    required this.autorizadorPor,
+    required this.observ_ofrecimiento,
   });
 
   factory TrainData.fromJson(Map<String, dynamic> json) {
@@ -74,7 +76,8 @@ class TrainData {
       vacios: data['vacios'] ?? 0,
       validado_por: data['validado_por'] ?? 0,
       autorizadorPor: data['autorizado_por'] ?? '',
-      observaciones: data['observaciones'] ?? ''    
+      observaciones: data['observaciones'] ?? '',
+      observ_ofrecimiento: data['observ_ofrecimiento'] ?? ''    
     );
   }
 }
