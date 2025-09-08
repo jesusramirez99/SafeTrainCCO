@@ -18,6 +18,12 @@ class AutorizarTrenProvider with ChangeNotifier {
     required String fecha,
     required String estacionActual,
     required String fechaLlamado,
+    required String ObservacionesAut,
+    String? file1,
+    String? file2,
+    String? file1Name,
+    String? file2Name,
+
   }) async {
     final url =
         Uri.parse("${Enviroment.baseUrl}/autorizarTren");
@@ -29,8 +35,16 @@ class AutorizarTrenProvider with ChangeNotifier {
       "autorizado_por": autorizadoPor,
       "fecha_autorizado": DateTime.now().toIso8601String(),
       "estacion_actual": estacionActual,
+      "llamado_por": autorizadoPor,
       "fecha_llamado": fechaLlamado,
+      "observ_autorizado": ObservacionesAut,
+      "nombre_archivo1": file1Name,
+      "nombre_archivo2": file2Name,
+      "archivo1": file1,
+      "archivo2": file2,
     };
+
+    print('informacion: ${requestBody}');
 
     try {
       _isLoading = true;
@@ -40,6 +54,7 @@ class AutorizarTrenProvider with ChangeNotifier {
       final response = await http.put(
         url,
         headers: {"Content-Type": "application/json"},
+        
         body: jsonEncode(requestBody),
       );
 

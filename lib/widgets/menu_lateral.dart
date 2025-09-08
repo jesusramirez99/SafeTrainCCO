@@ -251,6 +251,8 @@ class MenuLateralState extends State<MenuLateral> {
                       estacion: estacion ?? 'Estación no seleccionada',
                       fechaController: TextEditingController(),
                       horaController: TextEditingController(text: hora),
+                      observacionesController: TextEditingController(),
+
                     ),
                   );
                 },

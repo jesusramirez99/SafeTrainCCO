@@ -1,3 +1,8 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:html' as html;
+import 'dart:typed_data';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -9,11 +14,15 @@ import 'package:safe_train_cco/modelos/user_provider.dart';
 import 'package:safe_train_cco/widgets/campo_fecha.dart';
 import 'package:safe_train_cco/widgets/text_input_formatter_hour.dart';
 
+
+
 class ModalAutorizarTren extends StatefulWidget {
   final String tren;
   final String estacion;
   final TextEditingController fechaController;
   final TextEditingController horaController;
+  final TextEditingController observacionesController;
+  
 
   const ModalAutorizarTren({
     super.key,
@@ -21,6 +30,8 @@ class ModalAutorizarTren extends StatefulWidget {
     required this.estacion,
     required this.fechaController,
     required this.horaController,
+    required this.observacionesController,
+
   });
 
   @override
@@ -29,6 +40,11 @@ class ModalAutorizarTren extends StatefulWidget {
 
 class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController observacionesController = TextEditingController();
+  String? file1;
+  String? file2;
+  String? file1Name;
+  String? file2Name;
 
   @override
   void initState() {
@@ -36,6 +52,12 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
     setState(() {
       widget.horaController.clear();
     });
+  }
+
+  @override
+  void dispose() {
+    observacionesController.dispose();
+    super.dispose();
   }
 
   @override
@@ -75,6 +97,9 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                 setState(() {
                   widget.fechaController.clear();
                   widget.horaController.clear();
+                  widget.observacionesController.clear();
+                  file1 = null;
+                  file2 = null;
                 });
               },
             ),
@@ -148,11 +173,155 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                               );
                             },
                           ),
-                        )
+                        ),  
                       ],
                     ),
                   ),
                   const SizedBox(height: 15.0),
+
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextFormField(
+                      controller: widget.observacionesController,
+                      maxLines: 4,
+                      maxLength: 300,
+                      decoration: InputDecoration(
+                        labelText: 'Observaciones',
+                        alignLabelWithHint: true,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        )
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 15.0),
+
+
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      TextButton(
+                        onPressed: () async {
+                          Future<Map<String, String>?> pickFileAsBase64() {
+                            final completer = Completer<Map<String, String>?>();
+                            final uploadInput = html.FileUploadInputElement()
+                              ..accept = '*'
+                              ..click();
+
+                            uploadInput.onChange.listen((event) {
+                              final file = uploadInput.files?.first;
+                              if (file == null) {
+                                completer.complete(null);
+                                return;
+                              }
+
+                              final reader = html.FileReader();
+                              reader.readAsArrayBuffer(file);
+                              reader.onLoadEnd.listen((event) {
+                                final data = reader.result as Uint8List;
+                                final base64Content = base64Encode(data); 
+
+                                completer.complete({
+                                  "name": file.name,          
+                                  "content": base64Content,   
+                                });
+                              });
+
+                              reader.onError.listen((event) {
+                                completer.completeError('Error al leer el archivo');
+                              });
+                            });
+
+                            return completer.future;
+                          }
+
+                          final fileData = await pickFileAsBase64();
+                          if (fileData != null) {
+                            final fileName = fileData["name"];
+                            final fileContentBase64 = fileData["content"];
+                            /*debugPrint("📂 Nombre archivo: $fileName");
+                            debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
+                            setState(() {
+                              file1Name = fileName ?? '';
+                              file1 = fileContentBase64 ?? '';
+                            });
+                          }
+                        },    
+                        style: buttonStyle(),
+                        child: const Row(
+                          children: [
+                            Text('Archivo 1',
+                                style: TextStyle(color: Colors.black, fontSize: 18.0)),
+                            SizedBox(width: 8),
+                            Icon(Icons.upload_file, color: Colors.black, size: 18.0),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 15),
+
+                      TextButton(
+                        onPressed: () async {
+                          Future<Map<String, String>?> pickFileAsBase64() {
+                            final completer = Completer<Map<String, String>?>();
+                            final uploadInput = html.FileUploadInputElement()
+                              ..accept = '*'
+                              ..click();
+
+                            uploadInput.onChange.listen((event) {
+                              final file = uploadInput.files?.first;
+                              if (file == null) {
+                                completer.complete(null);
+                                return;
+                              }
+
+                              final reader = html.FileReader();
+                              reader.readAsArrayBuffer(file); 
+                              reader.onLoadEnd.listen((event) {
+                                final data = reader.result as Uint8List;
+                                final base64Content = base64Encode(data);
+
+                                completer.complete({
+                                  "name": file.name,          
+                                  "content": base64Content,  
+                                });
+                              });
+
+                              reader.onError.listen((event) {
+                                completer.completeError('Error al leer el archivo');
+                              });
+                            });
+
+                            return completer.future;
+                          }
+
+
+
+                          final fileData = await pickFileAsBase64();
+                          if (fileData != null) {
+                            final fileName = fileData["name"];
+                            final fileContentBase64 = fileData["content"];
+                            /*debugPrint("📂 Nombre archivo: $fileName");
+                            debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
+                            setState(() {
+                              file2Name = fileName ?? '';
+                              file2 = fileContentBase64 ?? '';
+                            });
+                          }
+                        },        
+                        style: buttonStyle(),
+                        child: const Row(
+                          children: [
+                            Text('Archivo 2',
+                                style: TextStyle(color: Colors.black, fontSize: 18.0)),
+                            SizedBox(width: 8),
+                            Icon(Icons.upload_file, color: Colors.black, size: 18.0),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
                 ],
               ),
             ),
@@ -191,6 +360,11 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                         String fechaSistema = DateTime.now().toIso8601String();
                         String fecha = widget.fechaController.text;
                         String hora = widget.horaController.text;
+                        String observations = widget.observacionesController.text.isEmpty ? 'Sin observaciones' : widget.observacionesController.text;
+                        String file1Content = file1?.isEmpty ?? true ? '' : file1!;
+                        String file2Content = file2?.isEmpty ?? true ? '' : file2!;
+                        String file1name = file1Name?.isEmpty ?? true ? '' : file1Name!;
+                        String file2name = file2Name?.isEmpty ?? true ? '' : file2Name!;
 
                         try {
                           DateFormat format = DateFormat('dd-MM-yyyy HH:mm');
@@ -236,6 +410,11 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                             fecha: fechaSistema,
                             estacionActual: widget.estacion,
                             fechaLlamado: formatDateLlamado,
+                            ObservacionesAut: observations,
+                            file1: file1Content,
+                            file2: file2Content,
+                            file1Name: file1name,
+                            file2Name: file2name
                           );
 
                           if (success) {
@@ -375,4 +554,6 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
       ],
     );
   }
+
+  
 }

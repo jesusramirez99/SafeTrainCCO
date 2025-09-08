@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -31,6 +33,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   String? _selectedTrainId;
   String _filterStation = "";
   late final ScrollController _horizontalScrollController;
+  Timer? _timer;
   
   @override
   void initState() {
@@ -42,10 +45,14 @@ class _DataTrainTableState extends State<DataTrainTable> {
     _selectedRowIndex = -1;
     _selectedTrainId = null;
     providerDataTrain.tableTrainsOffered(context, user);
+    _timer = Timer.periodic(const Duration(minutes: 2), (_) {
+      providerDataTrain.tableTrainsOffered(context, user);
+    });
   }
 
   @override
   void dispose() {
+    _timer?.cancel();
     _horizontalScrollController.dispose();
     super.dispose();
   }
@@ -517,7 +524,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                 ),
                               ),
 
-                              const SizedBox(height: 8),
+                              
 
                               // ── Tabla ──
                               DataTable(
