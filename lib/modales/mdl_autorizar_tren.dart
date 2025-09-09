@@ -41,10 +41,10 @@ class ModalAutorizarTren extends StatefulWidget {
 class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController observacionesController = TextEditingController();
-  String? file1;
-  String? file2;
-  String? file1Name;
-  String? file2Name;
+  String file1 = '';
+  String file2 = '';
+  String file1Name = '';
+  String file2Name = '';
 
   @override
   void initState() {
@@ -98,8 +98,10 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                   widget.fechaController.clear();
                   widget.horaController.clear();
                   widget.observacionesController.clear();
-                  file1 = null;
-                  file2 = null;
+                  file1 = '';
+                  file2 = '';
+                  file1Name = '';
+                  file2Name = '';
                 });
               },
             ),
@@ -196,129 +198,191 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                   ),
 
                   const SizedBox(height: 15.0),
-
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      TextButton(
-                        onPressed: () async {
-                          Future<Map<String, String>?> pickFileAsBase64() {
-                            final completer = Completer<Map<String, String>?>();
-                            final uploadInput = html.FileUploadInputElement()
-                              ..accept = '*'
-                              ..click();
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                            TextButton(
+                              onPressed: () async {
+                                Future<Map<String, String>?> pickFileAsBase64() {
+                                  final completer = Completer<Map<String, String>?>();
+                                  final uploadInput = html.FileUploadInputElement()
+                                    ..accept = '*'
+                                    ..click();
 
-                            uploadInput.onChange.listen((event) {
-                              final file = uploadInput.files?.first;
-                              if (file == null) {
-                                completer.complete(null);
-                                return;
-                              }
+                                  uploadInput.onChange.listen((event) {
+                                    final file = uploadInput.files?.first;
+                                    if (file == null) {
+                                      completer.complete(null);
+                                      return;
+                                    }
 
-                              final reader = html.FileReader();
-                              reader.readAsArrayBuffer(file);
-                              reader.onLoadEnd.listen((event) {
-                                final data = reader.result as Uint8List;
-                                final base64Content = base64Encode(data); 
+                                    final reader = html.FileReader();
+                                    reader.readAsArrayBuffer(file);
+                                    reader.onLoadEnd.listen((event) {
+                                      final data = reader.result as Uint8List;
+                                      final base64Content = base64Encode(data); 
 
-                                completer.complete({
-                                  "name": file.name,          
-                                  "content": base64Content,   
-                                });
-                              });
+                                      completer.complete({
+                                        "name": file.name,          
+                                        "content": base64Content,   
+                                      });
+                                    });
 
-                              reader.onError.listen((event) {
-                                completer.completeError('Error al leer el archivo');
-                              });
-                            });
+                                    reader.onError.listen((event) {
+                                      completer.completeError('Error al leer el archivo');
+                                    });
+                                  });
 
-                            return completer.future;
-                          }
+                                  return completer.future;
+                                }
 
-                          final fileData = await pickFileAsBase64();
-                          if (fileData != null) {
-                            final fileName = fileData["name"];
-                            final fileContentBase64 = fileData["content"];
-                            /*debugPrint("📂 Nombre archivo: $fileName");
-                            debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
-                            setState(() {
-                              file1Name = fileName ?? '';
-                              file1 = fileContentBase64 ?? '';
-                            });
-                          }
-                        },    
-                        style: buttonStyle(),
-                        child: const Row(
-                          children: [
-                            Text('Archivo 1',
-                                style: TextStyle(color: Colors.black, fontSize: 18.0)),
-                            SizedBox(width: 8),
-                            Icon(Icons.upload_file, color: Colors.black, size: 18.0),
-                          ],
-                        ),
+                                final fileData = await pickFileAsBase64();
+                                if (fileData != null) {
+                                  final fileName = fileData["name"];
+                                  final fileContentBase64 = fileData["content"];
+                                  /*debugPrint("📂 Nombre archivo: $fileName");
+                                  debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
+                                  setState(() {
+                                    file1Name = fileName ?? '';
+                                    file1 = fileContentBase64 ?? '';
+                                  });
+                                }
+                              },    
+                              style: buttonStyle(),
+                              child: const Row(
+                                children: [
+                                  Text('Archivo 1',
+                                      style: TextStyle(color: Colors.black, fontSize: 18.0)),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.upload_file, color: Colors.black, size: 18.0),
+                                ],
+                              ),
+                            ),
+
+                            if(file1Name.isNotEmpty)...[
+                              const SizedBox(height: 6),
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                    const Icon(Icons.insert_drive_file, size: 16, color: Colors.grey),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        file1Name,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: (){ 
+                                        setState(() {
+                                        file1Name = '';
+                                        file1 = '';
+                                      });
+                                      },
+                                      icon: const Icon(Icons.close, size: 18, color: Colors.red)
+                                    ),
+                                ],
+                              ),
+                            ],
+                        ],
                       ),
 
                       const SizedBox(width: 15),
 
-                      TextButton(
-                        onPressed: () async {
-                          Future<Map<String, String>?> pickFileAsBase64() {
-                            final completer = Completer<Map<String, String>?>();
-                            final uploadInput = html.FileUploadInputElement()
-                              ..accept = '*'
-                              ..click();
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                            TextButton(
+                              onPressed: () async {
+                                Future<Map<String, String>?> pickFileAsBase64() {
+                                  final completer = Completer<Map<String, String>?>();
+                                  final uploadInput = html.FileUploadInputElement()
+                                    ..accept = '*'
+                                    ..click();
 
-                            uploadInput.onChange.listen((event) {
-                              final file = uploadInput.files?.first;
-                              if (file == null) {
-                                completer.complete(null);
-                                return;
-                              }
+                                  uploadInput.onChange.listen((event) {
+                                    final file = uploadInput.files?.first;
+                                    if (file == null) {
+                                      completer.complete(null);
+                                      return;
+                                    }
 
-                              final reader = html.FileReader();
-                              reader.readAsArrayBuffer(file); 
-                              reader.onLoadEnd.listen((event) {
-                                final data = reader.result as Uint8List;
-                                final base64Content = base64Encode(data);
+                                    final reader = html.FileReader();
+                                    reader.readAsArrayBuffer(file); 
+                                    reader.onLoadEnd.listen((event) {
+                                      final data = reader.result as Uint8List;
+                                      final base64Content = base64Encode(data);
 
-                                completer.complete({
-                                  "name": file.name,          
-                                  "content": base64Content,  
-                                });
-                              });
+                                      completer.complete({
+                                        "name": file.name,          
+                                        "content": base64Content,  
+                                      });
+                                    });
 
-                              reader.onError.listen((event) {
-                                completer.completeError('Error al leer el archivo');
-                              });
-                            });
+                                    reader.onError.listen((event) {
+                                      completer.completeError('Error al leer el archivo');
+                                    });
+                                  });
 
-                            return completer.future;
-                          }
+                                  return completer.future;
+                                }
 
 
 
-                          final fileData = await pickFileAsBase64();
-                          if (fileData != null) {
-                            final fileName = fileData["name"];
-                            final fileContentBase64 = fileData["content"];
-                            /*debugPrint("📂 Nombre archivo: $fileName");
-                            debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
-                            setState(() {
-                              file2Name = fileName ?? '';
-                              file2 = fileContentBase64 ?? '';
-                            });
-                          }
-                        },        
-                        style: buttonStyle(),
-                        child: const Row(
-                          children: [
-                            Text('Archivo 2',
-                                style: TextStyle(color: Colors.black, fontSize: 18.0)),
-                            SizedBox(width: 8),
-                            Icon(Icons.upload_file, color: Colors.black, size: 18.0),
-                          ],
-                        ),
+                                final fileData = await pickFileAsBase64();
+                                if (fileData != null) {
+                                  final fileName = fileData["name"];
+                                  final fileContentBase64 = fileData["content"];
+                                  /*debugPrint("📂 Nombre archivo: $fileName");
+                                  debugPrint("🔐 Contenido codificado: $fileContentBase64");*/
+                                  setState(() {
+                                    file2Name = fileName ?? '';
+                                    file2 = fileContentBase64 ?? '';
+                                  });
+                                }
+                              },        
+                              style: buttonStyle(),
+                              child: const Row(
+                                children: [
+                                  Text('Archivo 2',
+                                      style: TextStyle(color: Colors.black, fontSize: 18.0)),
+                                  SizedBox(width: 8),
+                                  Icon(Icons.upload_file, color: Colors.black, size: 18.0),
+                                ],
+                              ),
+                            ),
+
+                            if(file2Name.isNotEmpty)...[
+                                const SizedBox(height: 6),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                      const Icon(Icons.insert_drive_file, size: 16, color: Colors.grey),
+                                      const SizedBox(width: 6),
+                                      Flexible(
+                                        child: Text(
+                                          file1Name,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 14, color: Colors.black87),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        onPressed: (){ 
+                                          setState(() {
+                                            file2Name = '';
+                                            file2 = '';
+                                          });
+                                        },
+                                        icon: const Icon(Icons.close, size: 18, color: Colors.red)
+                                      )
+                                  ],
+                                ),
+                            ],
+                        ],
                       ),
                     ],
                   )
@@ -336,6 +400,13 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
               onPressed: () {
                 widget.fechaController.clear();
                 widget.horaController.clear();
+                widget.observacionesController.clear();
+                setState(() {
+                  file1 = '';
+                  file2 = '';
+                  file1Name = '';
+                  file2Name = '';
+                });
               },
               style: buttonStyle(),
               child: const Row(
