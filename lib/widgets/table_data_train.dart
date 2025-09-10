@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:another_flushbar/flushbar.dart';
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -379,205 +380,111 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }
 
 
-  Widget _buildTableStatusTrainsOffered(){
-    
-    final screenWidth = MediaQuery.of(context).size.width;
-    final ScrollController _horizontalScrollController = ScrollController();
-    final isLargeScreen = screenWidth > 1800;
-    final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
-    //final estaciones = Provider.of<EstacionesProvider>(context);
-    final filteredTrains = _filterStation.isEmpty ? providerDataTrain.dataTrainsOffered : providerDataTrain.dataTrainsOffered.where((train) => train['estacion_actual'].toString().toLowerCase().contains(_filterStation.toLowerCase())).toList();
-    //final trains = providerDataTrain.dataTrainsOffered;
-    return Column(
-      children: [
-        const Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Center(
-            child: Text(
-              'Estatus Trenes Ofrecidos',
-              style: TextStyle(
-                fontSize: 22.0,
-                color: Colors.black,
-                decoration: TextDecoration.underline,
-              ),
+  Widget _buildTableStatusTrainsOffered() {
+  final providerDataTrain = Provider.of<TablesTrainsProvider>(context);
+  final filteredTrains = _filterStation.isEmpty
+      ? providerDataTrain.dataTrainsOffered
+      : providerDataTrain.dataTrainsOffered
+          .where((train) => train['estacion_actual']
+              .toString()
+              .toLowerCase()
+              .contains(_filterStation.toLowerCase()))
+          .toList();
+
+
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      // ── Título ──
+      const Padding(
+        padding: EdgeInsets.all(12.0),
+        child: Center(
+          child: Text(
+            'Estatus Trenes Ofrecidos',
+            style: TextStyle(
+              fontSize: 22.0,
+              color: Colors.black,
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
-
-        if (isLargeScreen) ...[
-          Expanded(
-            child: Scrollbar(
-              thumbVisibility: true,
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // ── Filtro alineado con la primera columna ──}
-                      const SizedBox(height: 15),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 230, // ancho igual al de la primera columna "Tren"
-                            child: TextField(
-                              decoration: const InputDecoration(
-                                labelText: "Buscar estación",
-                                prefixIcon: Icon(Icons.search),
-                                border: OutlineInputBorder(),
-                                isDense: true,
-                                contentPadding:
-                                    EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                              ),
-                              onChanged: (value) {
-                                setState(() {
-                                  _filterStation = value;
-                                });
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8), // espacio entre filtro y tabla
-
-                      // ── Tabla ──
-                      DataTable(
-                        headingRowHeight: 56,
-                        dataRowHeight: 65,
-                        decoration: _cabeceraTabla(),
-                        border: TableBorder(
-                          horizontalInside:
-                              BorderSide(color: Colors.grey.shade400, width: 1),
-                          verticalInside:
-                              BorderSide(color: Colors.grey.shade400, width: 1),
-                        ),
-                        columns: _buildColumnsTrainStatusTrainsOffered(),
-                        rows: List<DataRow>.generate(
-                        filteredTrains.length,
-                          (index) => DataRow(
-                            selected: index == _selectedRowIndex,
-                            color: MaterialStateColor.resolveWith((states) => states
-                                    .contains(MaterialState.selected)
-                                ? const Color.fromARGB(255, 226, 237, 247)
-                                : (index % 2 == 0 ? Colors.white : Colors.white)),
-                            cells: _buildCellsTrainStatusTrainsOffered(
-                              filteredTrains[index],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      ),
+      // ── Filtro ──
+      Padding(
+        padding: const EdgeInsets.only(top: 8, bottom: 8),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: SizedBox(
+            width: 230, // mismo ancho que la primera columna de la tabla
+            child: TextField(
+              decoration: const InputDecoration(
+                labelText: "Buscar estación",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               ),
-            ),
-          ),
-        ]
-
-        // ── Pantallas pequeñas: scroll horizontal de toda la tabla ────────────
-        else
-          Expanded(
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final isSmallScreen = constraints.maxWidth < 800;
-                return ScrollbarTheme(
-                  data: ScrollbarThemeData(
-                    thumbColor: MaterialStateProperty.all(Colors.grey),
-                    trackColor: MaterialStateProperty.all(Colors.grey.shade300),
-                    trackBorderColor: MaterialStateProperty.all(Colors.grey.shade400),
-                    radius: const Radius.circular(8),
-                    thickness: MaterialStateProperty.all(8.0),
-                  ),
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    controller: _horizontalScrollController,
-                    child: SingleChildScrollView(
-                      controller: _horizontalScrollController,
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: isSmallScreen ? constraints.maxWidth : 1000,
-                        ),
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.vertical,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // ── Filtro ──
-                              SizedBox(
-                                width: 230, // mismo ancho que primera columna
-                                child: TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: "Buscar estación",
-                                    prefixIcon: Icon(Icons.search),
-                                    border: OutlineInputBorder(),
-                                    isDense: true,
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                  ),
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _filterStation = value;
-                                    });
-                                  },
-                                ),
-                              ),
-
-                              
-
-                              // ── Tabla ──
-                              DataTable(
-                                columnSpacing: 10.0,
-                                dataRowHeight: 50.0,
-                                decoration: _cabeceraTabla(),
-                                columns: _buildColumnsTrainStatusTrainsOffered(),
-                                rows: List<DataRow>.generate(
-                                  filteredTrains.length,
-                                  (index) => DataRow(
-                                    selected: index == _selectedRowIndex,
-                                    color: MaterialStateColor.resolveWith((states) {
-                                      return states.contains(MaterialState.selected)
-                                          ? const Color.fromARGB(255, 226, 237, 247)
-                                          : (index % 2 == 0 ? Colors.white : Colors.white);
-                                    }),
-                                    cells: _buildCellsTrainStatusTrainsOffered(
-                                      filteredTrains[index],
-                                    ),
-                                  ),
-                                ),
-                                border: TableBorder(
-                                  horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                  verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
+              onChanged: (value) {
+                setState(() {
+                  _filterStation = value;
+                });
               },
             ),
           ),
-      ],
-    );
-  }
+        ),
+      ),
+
+      LayoutBuilder(
+        builder: (context, constraints) {
+          const double rowHeight = 70;
+          const double headingHeight = 48;
+          const double maxHeight = 800;
+          // calcular altura de la tabla según filas filtradas
+          final tableHeight = (filteredTrains.length * rowHeight + headingHeight).clamp(0, maxHeight);
+          
+          return SizedBox(
+            height: tableHeight.toDouble(),
+            child: DataTable2(
+              headingRowHeight: headingHeight,
+              dataRowHeight: rowHeight,
+              horizontalMargin: 8,
+              columnSpacing: 12,
+              minWidth: 1530,
+              border: TableBorder(
+                horizontalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+                verticalInside: BorderSide(color: Colors.grey.shade400, width: 1),
+              ),
+              decoration: _cabeceraTabla(),
+              columns: _buildColumnsTrainStatusTrainsOffered(),
+              rows: filteredTrains.map((train) => DataRow(
+                color: MaterialStateColor.resolveWith((states) =>
+                    states.contains(MaterialState.selected)
+                        ? const Color.fromARGB(255, 226, 237, 247)
+                        : (filteredTrains.indexOf(train) % 2 == 0 ? Colors.white : Colors.grey.shade100)
+                ),
+                cells: _buildCellsTrainStatusTrainsOffered(train),
+              )).toList(),
+            ),
+          );
+        },
+      ),
+    ],
+  );
+}
 
   List<DataColumn> _buildColumnsTrainStatusTrainsOffered(){
     return [
-      DataColumn(label: _buildHeaderCell('Tren')),
-      DataColumn(label: _buildHeaderCell('Estacion Actual')),
-      DataColumn(label: _buildHeaderCell('Carros')),
-      DataColumn(label: _buildHeaderCell('Validado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nValidado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nOfrecido')),
-      DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
-      DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
-      DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Registro de \nSalida'))
+      DataColumn2(label: _buildHeaderCell('Tren'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Estacion\nActual'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Carros'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Validado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nValidado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nOfrecido'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Estatus\nCCO'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Registro de \nSalida'), size: ColumnSize.S)
     ];
   }
 
@@ -655,7 +562,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),*/
 
       // Fecha Ofrecido
-      _buildCellDateString(
+      _buildCellDateStringObservations(
+        messageObservations: data['observ_ofrecimiento'] ?? '',
+        context: context,
         text: data['ofrecido_por']?.toString() ?? '', 
         widget: data['ofrecido_por'] == ''
               ? const SizedBox() // Celda vacía si no hay nada en la celda
@@ -771,7 +680,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   style: TextStyle(
                     fontSize: 15.0,
                     fontWeight: FontWeight.bold,
-                    color: textColor,
+                    color: textColor,                  
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -785,7 +694,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
     required String messageObservations,
     required String text,
     required Widget widget,
-    Color textColor = Colors.black,
+    Color textColor = Colors.blueAccent,
     required BuildContext context,
     
   }) {
@@ -796,34 +705,40 @@ class _DataTrainTableState extends State<DataTrainTable> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             widget,
-            GestureDetector(
-              onTap: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Observaciones"),
-                    content: Text(
-                      messageObservations.isEmpty
-                          ? 'Sin Observaciones'
-                          : messageObservations,
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cerrar"),
+            MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: GestureDetector(
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Observaciones"),
+                      content: Text(
+                        messageObservations.isEmpty
+                            ? 'Sin Observaciones'
+                            : messageObservations,
                       ),
-                    ],
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cerrar"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 15.0,
+                    fontWeight: FontWeight.bold,
+                    color: textColor,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.blueAccent,
+                    decorationThickness: 2,
                   ),
-                );
-              },
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 15.0,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ],
