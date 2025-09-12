@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modales/mdl_autorizar_tren.dart';
 import 'package:safe_train_cco/modales/mdl_rechazar_tren.dart';
 import 'package:safe_train_cco/modelos/change_notifier_provider.dart';
@@ -62,25 +63,30 @@ class MenuLateralState extends State<MenuLateral> {
 
   @override
   Widget build(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+    final menuWidth = isLaptop ? 150.0 : 190.0;
+    final fontSize = isLaptop ? 10.5 : 13.0;
+    final iconTextSpacing = isLaptop ? 6.0 : 10.0;
+
     return Container(
-      width: 190.0,
+      width: menuWidth,
       color: Colors.black,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           const Divider(),
-          _btnIndicadores(),
+          _btnIndicadores(fontSize, iconTextSpacing),
           const Divider(),
-          _btnInfo(),
-          const Divider(),
-          const SizedBox(height: 4.0),
-          _btnHistorial(context),
-          const Divider(),
-          _btnRechazar(),
+          _btnInfo(fontSize, iconTextSpacing),
           const Divider(),
           const SizedBox(height: 4.0),
-          _btnAutorizar(),
+          _btnHistorial(context, fontSize, iconTextSpacing),
+          const Divider(),
+          _btnRechazar(fontSize, iconTextSpacing),
+          const Divider(),
+          const SizedBox(height: 4.0),
+          _btnAutorizar(fontSize, iconTextSpacing),
           const Divider(),
           // Form(key: formKey, child: _campoObs()),
         ],
@@ -89,8 +95,9 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON INDCADORES DEL TREN
-  Widget _btnIndicadores() {
+  Widget _btnIndicadores(double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
 
     return ValueListenableBuilder<int?>(
       valueListenable: selectionNotifier.selectedRowNotifier,
@@ -114,11 +121,11 @@ class MenuLateralState extends State<MenuLateral> {
                   isActive ? Icons.article_outlined : Icons.analytics_outlined,
                   color: Colors.white,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   isActive ? 'Datos del Tren' : 'Indicadores',
-                  style: const TextStyle(
-                    fontSize: 13.0,
+                  style: TextStyle(
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -130,7 +137,7 @@ class MenuLateralState extends State<MenuLateral> {
     );
   }
 
-  Widget _btnInfo() {
+  Widget _btnInfo(double fontSize, double iconText) {
     final selectionNotifier = Provider.of<SelectionNotifier>(context);
 
     return ValueListenableBuilder<int?>(
@@ -157,11 +164,11 @@ class MenuLateralState extends State<MenuLateral> {
                       : Icons.perm_device_information,
                   color: Colors.white,
                 ),
-                const SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   isActive ? 'Datos del Tren' : 'Información del Tren',
-                  style: const TextStyle(
-                    fontSize: 13.0,
+                  style: TextStyle(
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -174,7 +181,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON HISTORIAL ESTATUS DEL TREN
-  Widget _btnHistorial(BuildContext context) {
+  Widget _btnHistorial(BuildContext contextdouble, fontSize, double iconText) {
     return TextButton(
       onPressed: () async {
         final trainProvider =
@@ -207,15 +214,15 @@ class MenuLateralState extends State<MenuLateral> {
         ),
         foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
       ),
-      child: const Center(
+      child: Center(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: [
-            Icon(Icons.add_task_outlined, color: Colors.white),
-            SizedBox(width: 10),
+            const Icon(Icons.add_task_outlined, color: Colors.white),
+            SizedBox(width: iconText),
             Text(
               'Historial',
-              style: TextStyle(fontSize: 13.0, color: Colors.white),
+              style: TextStyle(fontSize: fontSize, color: Colors.white),
             ),
           ],
         ),
@@ -224,7 +231,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON AUTORIZAR TREN
-  Widget _btnAutorizar() {
+  Widget _btnAutorizar(double fontSize, double iconText) {
     return Consumer<EstatusCCOProvider>(
       builder: (context, estatusProvider, child) {
         final selectionNotifier = Provider.of<SelectionNotifier>(context);
@@ -258,19 +265,19 @@ class MenuLateralState extends State<MenuLateral> {
                 },
           style: _buttonStyle(
               selectionNotifier.selectedRowNotifier.value, isDisabled),
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(
+                const Icon(
                   Icons.train,
                   color: Color.fromARGB(255, 145, 228, 148),
                 ),
-                SizedBox(width: 10),
+                SizedBox(width: iconText),
                 Text(
                   'Autorizar Tren',
                   style: TextStyle(
-                    fontSize: 13.0,
+                    fontSize: fontSize,
                     color: Colors.white,
                   ),
                 ),
@@ -283,7 +290,7 @@ class MenuLateralState extends State<MenuLateral> {
   }
 
   // BOTON RECHAZAR TREN
-  Widget _btnRechazar() {
+  Widget _btnRechazar(double fontSize, double iconText) {
     return Consumer2<EstatusCCOProvider, SelectionNotifier>(
       builder: (context, estatusProvider, selectionNotifier, child) {
         int? selectedIndex = selectionNotifier.selectedRowNotifier.value;
@@ -318,15 +325,15 @@ class MenuLateralState extends State<MenuLateral> {
                   }
                 },
           style: _buttonStyle(selectedIndex, isDisabled),
-          child: const Center(
+          child: Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Icon(Icons.cancel, color: Colors.red),
-                SizedBox(width: 10),
+                const Icon(Icons.cancel, color: Colors.red),
+                SizedBox(width: iconText),
                 Text(
                   'Rechazar Tren',
-                  style: TextStyle(fontSize: 13.0, color: Colors.white),
+                  style: TextStyle(fontSize: fontSize, color: Colors.white),
                 ),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modales/mdl_comparacion_consist.dart';
 import 'package:safe_train_cco/modelos/change_notifier_provider.dart';
 import 'package:safe_train_cco/modelos/estaciones_provider.dart';
@@ -187,27 +188,32 @@ class CuerpoState extends State<Cuerpo> {
 
     final trenProvider = Provider.of<TrenYFechaModel>(context);
     final tren = trenProvider.trenYFecha;
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
 
     return Scaffold(
       body: Column(
         children: <Widget>[
           Row(
             children: <Widget>[
-              const SizedBox(
-                width: 30.0,
+              SizedBox(
+                width: isLaptop? 4.0 : 25.0,
                 height: 55.0,
               ),
               Expanded(
                 child: Center(
-                  child: textoListaTrenes('Autorización de Trenes'),
+                  child: textoListaTrenes('Autorización de Trenes', isLaptop),
                 ),
               ),
+              SizedBox(
+                width: isLaptop? 10.0 : 35.0,
+              )
             ],
+            
           ),
           Center(
             child: Container(
               color: Colors.grey.shade600,
-              height: 105.0,
+              height: isLaptop? 70.0 : 105.0,
               child: Form(
                 key: _formKey,
                 child: Column(
@@ -215,36 +221,37 @@ class CuerpoState extends State<Cuerpo> {
                     Expanded(
                       child: Row(
                         children: <Widget>[
-                          const SizedBox(width: 110.0),
+                          SizedBox(width: isLaptop? 50.0 : 155.0),
                           textos('Tren'),
-                          const SizedBox(width: 25.0),
+                          SizedBox(width: isLaptop? 15.0 : 25.0),
                           TextFieldIdTrain(
                             focusNode: widget.focusNode,
                             idTrainController: widget.idTrainController,
                             isEnabled: !_enabledIdTrain,
                           ),
-                          const SizedBox(width: 40.0),
+                          SizedBox(width: isLaptop? 20.0 : 40.0),
                           textos('Fecha'),
-                          const SizedBox(width: 1.0),
+                          SizedBox(width: isLaptop? 0.5 : 1.0),
                           Fecha(
                             fechaController: widget.fechaController,
                             isEnabled: !_enabledFecha,
                           ),
-                          const SizedBox(width: 40.0),
+                          SizedBox(width: isLaptop? 15.0 : 40.0),
                           _dropdownEstacion(context),
-                          const SizedBox(width: 40.0),
+                          SizedBox(width: isLaptop? 20.0 : 40.0),
                           iconSearch(),
-                          const SizedBox(width: 25.0),
+                          SizedBox(width: isLaptop? 20.0 : 25.0),
                           const BotonCancelar(),
                           Expanded(
                             child: Row(
+                              
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 //_iconCompareConsist(context),
-                                const SizedBox(width: 20.0),
+                                SizedBox(width: isLaptop? 10.0 : 5.0),
                                 iconPrint(context),
-                                const SizedBox(width: 45.0),
+                                SizedBox(width: isLaptop? 25.0 : 30.0),
                                 dateTime(context, "fecha"),
                                 const SizedBox(width: 10.0),
                                 const Text(
@@ -257,7 +264,7 @@ class CuerpoState extends State<Cuerpo> {
                               ],
                             ),
                           ),
-                          const SizedBox(width: 80.0),
+                          SizedBox(width: isLaptop? 80.0 : 180.0),
                         ],
                       ),
                     ),
@@ -310,6 +317,7 @@ class CuerpoState extends State<Cuerpo> {
 
   // WIDGET PARA LA FECHA Y HORA
   Widget dateTime(BuildContext context, String texto) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final dateProvider = Provider.of<DateProvider>(context);
 
     String displayText = '';
@@ -322,16 +330,16 @@ class CuerpoState extends State<Cuerpo> {
 
     return Text(
       displayText,
-      style: const TextStyle(fontSize: 17.0, color: Colors.white),
+      style: TextStyle(fontSize: isLaptop? 14.0 : 17.0, color: Colors.white),
     );
   }
 
   // Texto Tren Pendiente
-  Text textoListaTrenes(String texto) {
+  Text textoListaTrenes(String texto, bool size) {
     return Text(
       texto,
       style: TextStyle(
-        fontSize: 20.0,
+        fontSize: size ? 18.0 : 20.0,
         fontWeight: FontWeight.w700,
         color: Colors.grey.shade700,
       ),
@@ -352,6 +360,7 @@ class CuerpoState extends State<Cuerpo> {
 
   // ICONO DE BUSQUEDA DE TREN
   Widget iconSearch() {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return InkWell(
       onTap: _iconSearchEnable
           ? () {
@@ -368,7 +377,7 @@ class CuerpoState extends State<Cuerpo> {
           : null, // Si el widget está deshabilitado, onHover será null
       child: Icon(
         Icons.search,
-        size: 35.0,
+        size: isLaptop? 25.0 : 35.0,
         color: _isHovered ? Colors.grey.shade300 : Colors.white,
       ),
     );
@@ -400,6 +409,7 @@ class CuerpoState extends State<Cuerpo> {
   // ICONO PARA IMPRIMIR EXCEL
   Widget iconPrint(BuildContext context) {
     final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final tren = trenProvider.trenYFecha;
 
     final estacionProvider =
@@ -429,9 +439,9 @@ class CuerpoState extends State<Cuerpo> {
                 excelProvider.descargarExcel(tren, estacion);
               }
             : null,
-        child: const Icon(
+        child: Icon(
           Icons.print,
-          size: 23.0,
+          size: isLaptop? 20.0 : 23.0,
           color: Colors.white,
         ),
       ),
@@ -440,6 +450,7 @@ class CuerpoState extends State<Cuerpo> {
 
   // Dropdown Estacion
   Widget _dropdownEstacion(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return Consumer<EstacionesProvider>(
       builder: (context, estacionesProvider, _) {
         final estaciones = estacionesProvider.estaciones;
@@ -449,8 +460,8 @@ class CuerpoState extends State<Cuerpo> {
 
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          width: 220.0,
-          height: 45.0,
+          width: isLaptop? 170.0 : 220.0,
+          height: isLaptop? 40.0 : 45.0,
           child: estaciones.isEmpty
               ? const Center(child: CircularProgressIndicator())
               : Autocomplete<String>(
@@ -484,6 +495,9 @@ class CuerpoState extends State<Cuerpo> {
                           controller: controller,
                           focusNode: focusNode,
                           enabled: _enabledEstacion,
+                          style: TextStyle(
+                            fontSize: isLaptop? 14.0 : 16.0,
+                          ),
                           onChanged: (text) {
                             // Si el texto supera el límite actual, recortarlo
                             if (text.length > maxLength) {
@@ -502,7 +516,8 @@ class CuerpoState extends State<Cuerpo> {
                           },
                           decoration: _estiloDrop().copyWith(
                             hintText: 'ESTACION',
-                            hintStyle: const TextStyle(color: Colors.grey),
+                            hintStyle: TextStyle(color: Colors.grey, fontSize: isLaptop? 14.0 : 16.0),
+                          
                             suffixIcon: const Icon(
                               Icons.add_road_outlined,
                               color: Colors.grey,

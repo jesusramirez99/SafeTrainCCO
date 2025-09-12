@@ -365,7 +365,7 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                                       const SizedBox(width: 6),
                                       Flexible(
                                         child: Text(
-                                          file1Name,
+                                          file2Name,
                                           overflow: TextOverflow.ellipsis,
                                           style: const TextStyle(fontSize: 14, color: Colors.black87),
                                         ),

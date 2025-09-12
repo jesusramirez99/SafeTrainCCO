@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class TextFieldIdTrain extends StatefulWidget {
   final bool isEnabled;
@@ -29,13 +30,15 @@ class TextFieldIdTrainState extends State<TextFieldIdTrain> {
 
   @override
   Widget build(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+
     return Container(
       height: 55.0,
       child: Row(
         children: <Widget>[
           SizedBox(
-            width: 160,
-            height: 55.0,
+            width: isLaptop? 130 : 160,
+            height: isLaptop? 40.0 : 55.0,
             child: Column(
               children: <Widget>[
                 Expanded(
@@ -43,6 +46,9 @@ class TextFieldIdTrainState extends State<TextFieldIdTrain> {
                     controller: widget.idTrainController,
                     focusNode: widget.focusNode,
                     enabled: widget.isEnabled,
+                    style: TextStyle(
+                      fontSize: isLaptop? 14.0 : 16.0,
+                    ),
                     onChanged: (text) {
                       widget.idTrainController.text = text.toUpperCase();
                       widget.idTrainController.selection =

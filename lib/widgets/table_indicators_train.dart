@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modelos/indicadores_train_provider.dart';
 
 class IndicatorTrainTable extends StatefulWidget {
@@ -102,8 +103,9 @@ class _IndicatorTrainTableState extends State<IndicatorTrainTable> {
   }
 
   TextStyle _titleTables() {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return TextStyle(
-      fontSize: 22.0,
+      fontSize: isLaptop? 18.0 : 22.0,
       fontWeight: FontWeight.bold,
       color: Colors.grey.shade500,
     );

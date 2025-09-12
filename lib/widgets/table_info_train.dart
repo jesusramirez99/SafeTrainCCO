@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modelos/regla_incumplida_model.dart';
 import 'package:safe_train_cco/modelos/regla_incumplida_provider.dart';
 import 'package:safe_train_cco/modelos/tablas_tren_provider.dart';
@@ -88,7 +89,85 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
     List<String> reglas =
         infoTrain.map((item) => item['regla'].toString()).toList();
 
-    return Center(
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+
+    return isLaptop?
+
+    Container(
+  alignment: Alignment.topCenter,
+  child: Column(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Text(
+        'Información del Tren: $tren',
+        style: TextStyle(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+          color: Colors.grey.shade500,
+        ),
+        textAlign: TextAlign.center,
+      ),
+      const SizedBox(height: 10),
+
+      // 👇 contenedor con altura máxima según pantalla
+      ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% de pantalla
+        ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: StickyHeadersTable(
+            columnsLength: headers.length,
+            rowsLength: data.length,
+            columnsTitleBuilder: (i) => _buildHeaderCell(headers[i]),
+            rowsTitleBuilder: (i) => _buildRowHeaderCell(
+              '${i + 1}',
+              mostrarIcono: reglas[i].toString().trim() == 'F',
+              item: infoTrain[i],
+            ),
+            contentCellBuilder: (i, j) =>
+                _buildDataCell(data[j], i, reglas[j], infoTrain[j]),
+            legendCell: Container(),
+            cellDimensions: CellDimensions.variableColumnWidth(
+              columnWidths: List.generate(headers.length, (index) {
+                double screenWidth = MediaQuery.of(context).size.width;
+                double baseWidth = screenWidth / headers.length;
+
+                if (headers[index] == 'Secuencia') {
+                  return baseWidth * 0.7;
+                } else if (headers[index] == 'Unidad') {
+                  return baseWidth * 0.9;
+                } else if (headers[index] == 'Estatus') {
+                  return baseWidth * 0.6;
+                } else if (headers[index] == 'Tipo de Equipo') {
+                  return baseWidth * 0.7;
+                } else if (headers[index] == 'Articulados') {
+                  return baseWidth * 0.8;
+                } else if (headers[index] == 'Peso\nArticulado') {
+                  return baseWidth * 0.7;
+                } else if (headers[index] == 'Peso\nBruto') {
+                  return baseWidth * 0.6;
+                } else if (headers[index] == 'Longitud') {
+                  return baseWidth * 0.6;
+                } else {
+                  return baseWidth; // Distribución uniforme
+                }
+              }),
+              contentCellHeight: 60,
+              stickyLegendWidth: 0,
+              stickyLegendHeight: 50,
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+)
+
+    
+    :
+
+    Center(
       child: Container(
         padding: const EdgeInsets.all(10),
         child: Column(

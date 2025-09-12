@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class Fecha extends StatefulWidget {
   final bool isEnabled;
@@ -17,17 +18,21 @@ class FechaState extends State<Fecha> {
 
   @override
   Widget build(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12.0),
       child: Row(
         children: <Widget>[
           SizedBox(
-            width: 165,
-            height: 55.0,
+            width: isLaptop? 145.0 : 165,
+            height: isLaptop? 40.0 : 55.0,
             child: TextFormField(
               showCursor: false,
               controller: widget.fechaController,
               enabled: widget.isEnabled,
+              style: TextStyle(
+                fontSize: isLaptop? 14.0 : 16.0,
+              ),
               onTap: () async {
                 // Espera la selección de la fecha
                 final DateTime? picked = await _selectDate(context);

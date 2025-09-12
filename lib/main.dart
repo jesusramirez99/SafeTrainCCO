@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modelos/autorizar_tren_provider.dart';
 import 'package:safe_train_cco/modelos/change_notifier_provider.dart';
 import 'package:safe_train_cco/modelos/estaciones_provider.dart';
@@ -61,6 +62,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      builder: (context, child) => ResponsiveBreakpoints.builder(
+        child: child!, 
+        breakpoints: [
+          const Breakpoint(start: 0, end: 1920, name: 'LAPTOP'),
+          const Breakpoint(start: 1921, end: double.infinity, name: 'MONITOR'),
+        ],
+      ),
       initialRoute: '/ffcc',
       routes: {
         '/ffcc': (context) => const SelectFC(),
