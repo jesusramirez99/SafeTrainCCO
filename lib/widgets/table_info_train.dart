@@ -1,3 +1,4 @@
+import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -12,6 +13,7 @@ class InfoTrainTable extends StatefulWidget {
   final String estacion;
   final VoidCallback toggleTableInfo;
 
+
   const InfoTrainTable({
     super.key,
     required this.trainInfo,
@@ -24,6 +26,7 @@ class InfoTrainTable extends StatefulWidget {
 }
 
 class _InfoTrainTableState extends State<InfoTrainTable> {
+  final ScrollController _scrollController = ScrollController();
   @override
   void initState() {
     super.initState();
@@ -37,6 +40,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<TablesTrainsProvider>(context);
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
 
     if (provider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -44,8 +48,8 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
 
     return provider.infoTrain.isNotEmpty
         ? SizedBox(
-            width: MediaQuery.of(context).size.width * 0.8,
-            height: MediaQuery.of(context).size.height * 0.7,
+            width: isLaptop? MediaQuery.of(context).size.width * 0.8 : MediaQuery.of(context).size.width * 0.8,
+            height: isLaptop? MediaQuery.of(context).size.height * 0.6 : MediaQuery.of(context).size.height * 0.8,
             child: _buildStickyTable(provider.infoTrain),
           )
         : const Center(child: CircularProgressIndicator());
@@ -93,77 +97,111 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
 
     return isLaptop?
 
-    Container(
-  alignment: Alignment.topCenter,
-  child: Column(
-    crossAxisAlignment: CrossAxisAlignment.center,
-    children: [
-      Text(
-        'Información del Tren: $tren',
-        style: TextStyle(
-          fontSize: 22,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade500,
-        ),
-        textAlign: TextAlign.center,
-      ),
-      const SizedBox(height: 10),
 
-      // 👇 contenedor con altura máxima según pantalla
-      ConstrainedBox(
-        constraints: BoxConstraints(
-          maxHeight: MediaQuery.of(context).size.height * 0.6, // 60% de pantalla
-        ),
-        child: SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: StickyHeadersTable(
-            columnsLength: headers.length,
-            rowsLength: data.length,
-            columnsTitleBuilder: (i) => _buildHeaderCell(headers[i]),
-            rowsTitleBuilder: (i) => _buildRowHeaderCell(
-              '${i + 1}',
-              mostrarIcono: reglas[i].toString().trim() == 'F',
-              item: infoTrain[i],
+    Center(
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+              Text(
+              'Información del Tren: $tren',
+                style: TextStyle(
+                fontSize: 19,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade500,
+              ),
+              textAlign: TextAlign.center,
             ),
-            contentCellBuilder: (i, j) =>
-                _buildDataCell(data[j], i, reglas[j], infoTrain[j]),
-            legendCell: Container(),
-            cellDimensions: CellDimensions.variableColumnWidth(
-              columnWidths: List.generate(headers.length, (index) {
-                double screenWidth = MediaQuery.of(context).size.width;
-                double baseWidth = screenWidth / headers.length;
 
-                if (headers[index] == 'Secuencia') {
-                  return baseWidth * 0.7;
-                } else if (headers[index] == 'Unidad') {
-                  return baseWidth * 0.9;
-                } else if (headers[index] == 'Estatus') {
-                  return baseWidth * 0.6;
-                } else if (headers[index] == 'Tipo de Equipo') {
-                  return baseWidth * 0.7;
-                } else if (headers[index] == 'Articulados') {
-                  return baseWidth * 0.8;
-                } else if (headers[index] == 'Peso\nArticulado') {
-                  return baseWidth * 0.7;
-                } else if (headers[index] == 'Peso\nBruto') {
-                  return baseWidth * 0.6;
-                } else if (headers[index] == 'Longitud') {
-                  return baseWidth * 0.6;
-                } else {
-                  return baseWidth; // Distribución uniforme
-                }
-              }),
-              contentCellHeight: 60,
-              stickyLegendWidth: 0,
-              stickyLegendHeight: 50,
+            const SizedBox(height: 10),
+
+            /*Expanded(
+                  child: SizedBox(
+                    width: 1500, // 👈 ajusta el ancho total según tus columnas
+                    child: StickyHeadersTable(
+                      columnsLength: headers.length,
+                      rowsLength: data.length,
+                      columnsTitleBuilder: (i) => _buildHeaderCell(headers[i]),
+                      rowsTitleBuilder: (i) => _buildRowHeaderCell(
+                        '${i + 1}',
+                        mostrarIcono: reglas[i].toString().trim() == 'F',
+                        item: infoTrain[i],
+                      ),
+                      contentCellBuilder: (i, j) =>
+                          _buildDataCell(data[j], i, reglas[j], infoTrain[j]),
+                      legendCell: Container(),
+                      cellDimensions: CellDimensions.variableColumnWidth(
+                        columnWidths: List.generate(headers.length, (index) {
+                          switch (headers[index]) {
+                            case 'Secuencia': return 80;
+                            case 'Unidad': return 90;
+                            case 'Estatus': return 70;
+                            case 'Tipo de Equipo': return 110;
+                            case 'Articulados': return 105;
+                            case 'Peso\nArticulado': return 120;
+                            case 'Peso\nBruto': return 70;
+                            case 'Longitud': return 80;
+                            default: return 95;
+                          }
+                        }),
+                        contentCellHeight: 60,
+                        stickyLegendWidth: 0,
+                        stickyLegendHeight: 60,
+                      ),
+                    ),
+                  ),
+                
+                
+            ),*/
+            Expanded(
+              child: DataTable2(
+                columnSpacing: 12,
+                horizontalMargin: 12,
+                minWidth: 1500, // 👈 ancho total de la tabla
+                headingRowHeight: 60,
+                dataRowHeight: 60,
+                decoration: _cabeceraTabla(),
+                // columnas
+                border: const TableBorder(
+                  horizontalInside: BorderSide(color: Colors.black, width: 1),
+                ),
+                columns: headers.map((header) {
+                  return DataColumn2(
+                    label: Center(
+                      child: Text(
+                        header,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                    size: ColumnSize.M, // 👈 puedes jugar con S, M, L
+                  );
+                }).toList(),
+
+                // filas
+                rows: List.generate(data.length, (rowIndex) {
+                  return DataRow(
+                    color: MaterialStateProperty.all(const Color.fromARGB(255, 255, 252, 252)),
+                    cells: List.generate(headers.length, (colIndex) {
+                      return DataCell(
+                        _buildDataCell(
+                          data[rowIndex],
+                          colIndex,
+                          reglas[rowIndex],
+                          infoTrain[rowIndex],
+                        ),                        
+                      );
+                    }),
+                  );
+                }),
+              ),
             ),
-          ),
+          ],
         ),
       ),
-    ],
-  ),
-)
-
+    )
     
     :
 
@@ -235,7 +273,20 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
     );
   }
 
+  BoxDecoration _cabeceraTabla() {
+    return BoxDecoration(
+      border: Border(
+        left: BorderSide(color: Colors.grey.shade400),
+        right: BorderSide(color: Colors.grey.shade400),
+        top: BorderSide(color: Colors.grey.shade400),
+        bottom: BorderSide(color: Colors.grey.shade400),
+      ),
+      color: Colors.black,
+    );
+  }
+
   Widget _buildHeaderCell(String text) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return Container(
       color: Colors.black,
       padding: const EdgeInsets.all(8),
@@ -243,8 +294,8 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 15.0,
+          style: TextStyle(
+            fontSize: isLaptop? 13.0 : 15.0,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -284,6 +335,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
 
   Widget _buildDataCell(List<String> rowData, int columnIndex, String regla,
       Map<String, dynamic> item) {
+        final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     String text = rowData[columnIndex];
     bool esReglaF = regla == 'F';
 
@@ -317,7 +369,7 @@ class _InfoTrainTableState extends State<InfoTrainTable> {
             Text(
               text,
               style: TextStyle(
-                fontSize: 15.0,
+                fontSize: isLaptop? 11.0 : 15.0,
                 color: esReglaF ? Colors.red : Colors.black,
                 fontWeight: FontWeight.bold,
               ),
