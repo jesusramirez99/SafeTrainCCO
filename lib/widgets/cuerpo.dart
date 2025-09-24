@@ -244,7 +244,6 @@ class CuerpoState extends State<Cuerpo> {
                           const BotonCancelar(),
                           Expanded(
                             child: Row(
-                              
                               mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
@@ -533,7 +532,8 @@ class CuerpoState extends State<Cuerpo> {
                       child: Material(
                         elevation: 4.0,
                         child: SizedBox(
-                          height: 200.0,
+                          height: isLaptop? 200.0 : 200.0,
+                          width: isLaptop? 300.0 : 400.0,
                           child: ListView.builder(
                             padding: EdgeInsets.zero,
                             itemCount: options.length,

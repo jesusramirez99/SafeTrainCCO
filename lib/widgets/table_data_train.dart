@@ -118,138 +118,147 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 ),
 
                 
-              isLaptop ? 
+              isLaptop ?
 
-              ScrollbarTheme(
-                data: ScrollbarThemeData( 
-                  thumbColor: WidgetStateProperty.all<Color>(Colors.grey), // color del pulgar
-                  trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300), // fondo del track
-                  trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400), // borde del track
-                  radius: const Radius.circular(8), // borde redondeado del thumb
-                  thickness: WidgetStateProperty.all<double>(8.0), // grosor del thumb
-                ), 
-                  child: Scrollbar(
-                    thumbVisibility: true,
-                    trackVisibility: true,
-                    controller: _horizontalScrollController,
-                    child: SingleChildScrollView(
-                      controller: _horizontalScrollController,
-                      scrollDirection: Axis.horizontal,
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 10.0),
-                        child: DataTable(
-                          columnSpacing: 10.0,
-                          dataRowHeight: 75.0,
-                          decoration: _cabeceraTabla(),
-                          columns: _buildColumns(),
-                          rows: provider.trainData != null
-                              ? [
-                                  DataRow(
-                                    selected: _selectedRowIndex == 0,
-                                    onSelectChanged: (isSelected) {
-                                      setState(() {
-                                        if (isSelected != null && isSelected) {
-                                          _selectedRowIndex = 0;
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: 1000,
+                  ),
+                  child: ScrollbarTheme(
+                    data: ScrollbarThemeData( 
+                      thumbColor: WidgetStateProperty.all<Color>(Colors.grey), // color del pulgar
+                      trackColor: WidgetStateProperty.all<Color>(Colors.grey.shade300), // fondo del track
+                      trackBorderColor: WidgetStateProperty.all<Color>(Colors.grey.shade400), // borde del track
+                      radius: const Radius.circular(8), // borde redondeado del thumb
+                      thickness: WidgetStateProperty.all<double>(8.0), // grosor del thumb
+                    ), 
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        controller: _horizontalScrollController,
+                        child: SingleChildScrollView(
+                          controller: _horizontalScrollController,
+                          scrollDirection: Axis.horizontal,
+                          child: Padding(
+                            padding: const EdgeInsets.only(bottom: 10.0),
+                            child: DataTable(
+                              columnSpacing: 10.0,
+                              dataRowHeight: 75.0,
+                              decoration: _cabeceraTabla(),
+                              columns: _buildColumns(),
+                              rows: provider.trainData != null
+                                  ? [
+                                      DataRow(
+                                        selected: _selectedRowIndex == 0,
+                                        onSelectChanged: (isSelected) {
+                                          setState(() {
+                                            if (isSelected != null && isSelected) {
+                                              _selectedRowIndex = 0;
 
-                                          print(
-                                              'Fila seleccionada: $_selectedRowIndex');
+                                              print(
+                                                  'Fila seleccionada: $_selectedRowIndex');
 
-                                          if (provider.trainData != null) {
-                                            final estatusCCOProvider =
-                                                Provider.of<EstatusCCOProvider>(context,
+                                              if (provider.trainData != null) {
+                                                final estatusCCOProvider =
+                                                    Provider.of<EstatusCCOProvider>(context,
+                                                        listen: false);
+
+                                                // 🔥 Restablece el estatus antes de asignar uno nuevo
+                                                estatusCCOProvider.limpiarEstatus();
+
+                                                // Verifica que trainData.autorizado tenga un valor antes de actualizar
+                                                String nuevoEstatus =
+                                                    provider.trainData!.autorizado ?? '';
+
+                                                // Si el estatus es "Rechazado", actualiza en el provider
+                                                if (nuevoEstatus.isNotEmpty) {
+                                                  estatusCCOProvider
+                                                      .updateEstatusCCO(nuevoEstatus);
+                                                  setState(() {});
+                                                  print(
+                                                      'Estatus CCO actualizado a: $nuevoEstatus');
+                                                } else {
+                                                  print(
+                                                      'Estatus CCO vacío, no se actualiza.');
+                                                }
+
+                                                final trainProvider =
+                                                    Provider.of<TrenYFechaModel>(context,
+                                                        listen: false);
+                                                final idTrenProvider = Provider.of<IdTren>(
+                                                    context,
                                                     listen: false);
+                                                final train = provider.trainData!.idTren;
+                                                final idTrain = provider.trainData!.id;
 
-                                            // 🔥 Restablece el estatus antes de asignar uno nuevo
-                                            estatusCCOProvider.limpiarEstatus();
+                                                _selectedTrainId = train;
+                                                String? idTren = idTrain.toString();
 
-                                            // Verifica que trainData.autorizado tenga un valor antes de actualizar
-                                            String nuevoEstatus =
-                                                provider.trainData!.autorizado ?? '';
+                                                if (train != null && train.isNotEmpty) {
+                                                  trainProvider.setTrenYFecha(train);
+                                                  idTrenProvider.setId(idTrain);
+                                                  print('TREN: $train');
+                                                  print(
+                                                      'ID almacenado en Provider: ${idTrenProvider.idTren}');
+                                                } else {
+                                                  print(
+                                                      'Error: El tren no tiene un ID válido');
+                                                }
 
-                                            // Si el estatus es "Rechazado", actualiza en el provider
-                                            if (nuevoEstatus.isNotEmpty) {
-                                              estatusCCOProvider
-                                                  .updateEstatusCCO(nuevoEstatus);
-                                              setState(() {});
-                                              print(
-                                                  'Estatus CCO actualizado a: $nuevoEstatus');
+                                                final estacionProvider =
+                                                    Provider.of<EstacionesProvider>(context,
+                                                        listen: false);
+                                                final estacionActual =
+                                                    provider.trainData!.estacionActual;
+
+                                                if (estacionActual != null &&
+                                                    estacionActual.isNotEmpty) {
+                                                  estacionProvider.updateSelectedEstacion(
+                                                      estacionActual);
+                                                  print(
+                                                      'Estación seleccionada: $estacionActual');
+                                                } else {
+                                                  print(
+                                                      'Error: La estación no tiene un valor válido');
+                                                }
+
+                                                selectionNotifier.updateSelectedRow(0);
+                                              } else {
+                                                print('Error: provider.trainData es null');
+                                              }
                                             } else {
-                                              print(
-                                                  'Estatus CCO vacío, no se actualiza.');
+                                              _selectedRowIndex = -1;
+                                              selectionNotifier.updateSelectedRow(null);
                                             }
-
-                                            final trainProvider =
-                                                Provider.of<TrenYFechaModel>(context,
-                                                    listen: false);
-                                            final idTrenProvider = Provider.of<IdTren>(
-                                                context,
-                                                listen: false);
-                                            final train = provider.trainData!.idTren;
-                                            final idTrain = provider.trainData!.id;
-
-                                            _selectedTrainId = train;
-                                            String? idTren = idTrain.toString();
-
-                                            if (train != null && train.isNotEmpty) {
-                                              trainProvider.setTrenYFecha(train);
-                                              idTrenProvider.setId(idTrain);
-                                              print('TREN: $train');
-                                              print(
-                                                  'ID almacenado en Provider: ${idTrenProvider.idTren}');
-                                            } else {
-                                              print(
-                                                  'Error: El tren no tiene un ID válido');
-                                            }
-
-                                            final estacionProvider =
-                                                Provider.of<EstacionesProvider>(context,
-                                                    listen: false);
-                                            final estacionActual =
-                                                provider.trainData!.estacionActual;
-
-                                            if (estacionActual != null &&
-                                                estacionActual.isNotEmpty) {
-                                              estacionProvider.updateSelectedEstacion(
-                                                  estacionActual);
-                                              print(
-                                                  'Estación seleccionada: $estacionActual');
-                                            } else {
-                                              print(
-                                                  'Error: La estación no tiene un valor válido');
-                                            }
-
-                                            selectionNotifier.updateSelectedRow(0);
-                                          } else {
-                                            print('Error: provider.trainData es null');
-                                          }
-                                        } else {
-                                          _selectedRowIndex = -1;
-                                          selectionNotifier.updateSelectedRow(null);
-                                        }
-                                      });
-                                    },
-                                    color: MaterialStateColor.resolveWith(
-                                      (Set<MaterialState> states) {
-                                        return _selectedRowIndex == 0
-                                            ? Colors.lightBlue.shade50
-                                            : Colors.white;
-                                      },
-                                    ),
-                                    cells: _buildCells(context),
-                                  ),
-                                ]
-                              : [],
-                          border: TableBorder(
-                            horizontalInside:
-                                BorderSide(color: Colors.grey.shade400, width: 1),
-                            verticalInside:
-                                BorderSide(color: Colors.grey.shade400, width: 1),
+                                          });
+                                        },
+                                        color: MaterialStateColor.resolveWith(
+                                          (Set<MaterialState> states) {
+                                            return _selectedRowIndex == 0
+                                                ? Colors.lightBlue.shade50
+                                                : Colors.white;
+                                          },
+                                        ),
+                                        cells: _buildCells(context),
+                                      ),
+                                    ]
+                                  : [],
+                              border: TableBorder(
+                                horizontalInside:
+                                    BorderSide(color: Colors.grey.shade400, width: 1),
+                                verticalInside:
+                                    BorderSide(color: Colors.grey.shade400, width: 1),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    )
-                  )
-              ) :
+                        )
+                      )
+                  ),
+                ),
+              )
+
+               :
 
                DataTable(
                     columnSpacing: 10.0,
