@@ -209,13 +209,49 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                                 Future<Map<String, String>?> pickFileAsBase64() {
                                   final completer = Completer<Map<String, String>?>();
                                   final uploadInput = html.FileUploadInputElement()
-                                    ..accept = '*'
+                                    ..accept = '.xlsx,.pdf,.png,.jpg,.jpeg,.gif,.zip,.bmp,.webp'
                                     ..click();
 
                                   uploadInput.onChange.listen((event) {
                                     final file = uploadInput.files?.first;
                                     if (file == null) {
                                       completer.complete(null);
+                                      return;
+                                    }
+
+                                    const maxSize = 9 * 1024 * 1024;
+                                    if (file.size > maxSize) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            content: const Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.warning,
+                                                  color: Colors.orange,
+                                                  size: 60,
+                                                ),
+                                                SizedBox(height: 12),
+                                                Text(
+                                                   "El archivo supera el tamaño máximo permitido (9 MB)",
+                                                    textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Aceptar"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      completer.complete(null); // devolvemos null para que no rompa el flujo
                                       return;
                                     }
 
@@ -301,13 +337,49 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
                                 Future<Map<String, String>?> pickFileAsBase64() {
                                   final completer = Completer<Map<String, String>?>();
                                   final uploadInput = html.FileUploadInputElement()
-                                    ..accept = '*'
+                                    ..accept = '.xlsx,.pdf,.png,.jpg,.jpeg,.gif,.zip,.bmp,.webp'
                                     ..click();
 
                                   uploadInput.onChange.listen((event) {
                                     final file = uploadInput.files?.first;
                                     if (file == null) {
                                       completer.complete(null);
+                                      return;
+                                    }
+
+                                    const maxSize = 9 * 1024 * 1024;
+                                    if (file.size > maxSize) {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            content: const Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.warning,
+                                                  color: Colors.orange,
+                                                  size: 60,
+                                                ),
+                                                SizedBox(height: 12),
+                                                Text(
+                                                   "El archivo supera el tamaño máximo permitido (9 MB)",
+                                                    textAlign: TextAlign.center,
+                                                ),
+                                              ],
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                                child: const Text("Aceptar"),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                      completer.complete(null); // devolvemos null para que no rompa el flujo
                                       return;
                                     }
 
