@@ -498,7 +498,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         widget: formattedDateCell(
           date: train.autorizado == 'Rechazado'
               ? ''
-              : train.fechaLlamado ?? '',
+              : train.fechaAutorizadoRechazado.toString() ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
@@ -749,7 +749,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
-                  date: data['fecha_llamado']?.toString() ?? '',
+                  date: data['fecha_autorizado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
       ),
@@ -917,15 +917,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
             : SystemMouseCursors.basic,
         child: GestureDetector(
           onTap: () async {
-            if (text == 'Rechazado') {
-              if (tren.isEmpty || estacion.isEmpty) {
-                print('⚠️ Favor de seleccionar la fila del tren.');
-                _showFlushbar(context, 'Favor de seleccionar la fila del tren.',
-                    Colors.red);
-                return; // Detiene la ejecución
-              }
-              await tablesProvider.refreshTableDataTrain(
-                  context, tren, estacion);
+            if ((text == 'Rechazado') && (tren.isEmpty || estacion.isEmpty)) {
+              await tablesProvider.refreshTableDataTrain(context, tren, estacion);
               if (context.mounted) {
                 showDialog(
                   context: context,
