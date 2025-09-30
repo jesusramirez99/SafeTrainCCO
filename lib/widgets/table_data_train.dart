@@ -481,6 +481,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         train.autorizado ?? 'Autorizado',
         train.autorizado == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        train.observ_autorizado
       ),
 
       //Fecha CCO - Autorizado / Rechazado
@@ -730,6 +731,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         data['autorizado']?.toString() ?? 'Autorizado',
         data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        data['observ_autorizado'].toString(),
       ),
 
       // Fecha Autorizado / Rechazado
@@ -900,7 +902,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }
 
   DataCell _buildStatusCell(
-      String text, Color textColor, BuildContext context) {
+      String text, Color textColor, BuildContext context, [String? messageObservations]) {
     final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
     final tablesProvider =
         Provider.of<TablesTrainsProvider>(context, listen: false);
@@ -912,7 +914,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
     return DataCell(
       MouseRegion(
-        cursor: text == 'Rechazado'
+        cursor: (text == 'Rechazado' || text == 'Autorizado')
             ? SystemMouseCursors.click
             : SystemMouseCursors.basic,
         child: GestureDetector(
@@ -924,6 +926,24 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   context: context,
                   builder: (context) => const MostrarRechazoObsTrenes(),
                 );
+              }
+            } else if(text == 'Autorizado'){
+              if(context.mounted){
+                showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Observaciones"),
+                      content: Text(
+                        messageObservations == null || messageObservations.isEmpty? 'Sin observaciones' : messageObservations,
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("Cerrar"),
+                        ),
+                      ],
+                    ),
+                  );
               }
             }
           },
