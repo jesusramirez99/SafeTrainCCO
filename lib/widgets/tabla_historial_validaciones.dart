@@ -3,16 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:safe_train_cco/modales/motivos_rechazos_obs_id.dart';
 import 'package:safe_train_cco/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train_cco/modelos/rechazos_observaciones_data_provider.dart';
 import 'package:safe_train_cco/modelos/user_provider.dart';
 
-import 'package:safe_train_cco/modales/motivos_rechazos_obs_id.dart';
-
-class HistorialValidacionesModal extends StatelessWidget {
+class HistorialValidacionesModal extends StatefulWidget {
   final Future<void>? historialFuture;
 
   const HistorialValidacionesModal({super.key, this.historialFuture});
+
+  @override
+  State<HistorialValidacionesModal> createState() => _HistorialValidacionesModalState();
+
+  static Future<void> showHistorialValidacionesModal(
+      BuildContext context, Future<void> historialFuture) {
+    return showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return HistorialValidacionesModal(historialFuture: historialFuture);
+      },
+    );
+  }
+}
+
+class _HistorialValidacionesModalState extends State<HistorialValidacionesModal> {
+  Offset _offset = Offset.zero;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +41,7 @@ class HistorialValidacionesModal extends StatelessWidget {
     final TextEditingController controllerfecha = TextEditingController();
 
     return FutureBuilder(
-      future: historialFuture ?? Future.value(), // Manejar Future null
+      future: widget.historialFuture ?? Future.value(), // Manejar Future null
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -42,46 +59,67 @@ class HistorialValidacionesModal extends StatelessWidget {
         final validationHistory = provider.validationHistory;
         bool isScrollable = validationHistory.isNotEmpty;
 
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-          child: Container(
-            constraints: BoxConstraints(
-              maxWidth: MediaQuery.of(context).size.width * 0.9,
-              maxHeight: MediaQuery.of(context).size.height * 0.8,
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => Navigator.pop(context),
+                child: Container(color: Colors.black45),
+              )
             ),
-            child: IntrinsicWidth(
-              stepWidth: 100.0,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitle(tren ?? 'Sin Tren'),
-                    const SizedBox(height: 16.0),
-                    _buildSearchBar(context, controllertren, controllerfecha),
-                    const SizedBox(height: 22.0),
-                    validationHistory.isNotEmpty
-                        ? Flexible(
-                            child: _buildDataTable(
-                                validationHistory, isScrollable, context),
-                          )
-                        : const Center(
-                            child: Text(
-                              'No hay datos disponibles',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
-                            ),
-                          ),
-                    const SizedBox(height: 20.0),
-                    _buildCloseButton(context),
-                  ],
+
+            Transform.translate(
+              offset: _offset,
+              child: GestureDetector(
+                onPanUpdate: (details) {
+                  setState(() {
+                    _offset += details.delta;
+                  });
+                },
+                child: Dialog(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.of(context).size.width * 0.9,
+                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    ),
+                    child: IntrinsicWidth(
+                      stepWidth: 100.0,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTitle(tren ?? 'Sin Tren'),
+                            const SizedBox(height: 16.0),
+                            _buildSearchBar(context, controllertren, controllerfecha),
+                            const SizedBox(height: 22.0),
+                            validationHistory.isNotEmpty
+                                ? Flexible(
+                                    child: _buildDataTable(
+                                        validationHistory, isScrollable, context),
+                                  )
+                                : const Center(
+                                    child: Text(
+                                      'No hay datos disponibles',
+                                      style:
+                                          TextStyle(fontSize: 16, color: Colors.grey),
+                                    ),
+                                  ),
+                            const SizedBox(height: 20.0),
+                            _buildCloseButton(context),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-          ),
+          ],
         );
       },
     );
@@ -442,16 +480,5 @@ class HistorialValidacionesModal extends StatelessWidget {
         style: const TextStyle(color: Colors.white),
       ),
     ).show(context); // Agrega esta línea para mostrar el Flushbar
-  }
-
-  static Future<void> showHistorialValidacionesModal(
-      BuildContext context, Future<void> historialFuture) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return HistorialValidacionesModal(historialFuture: historialFuture);
-      },
-    );
   }
 }

@@ -865,20 +865,42 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 onTap: () {
                   showDialog(
                     context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Observaciones"),
-                      content: Text(
-                        messageObservations.isEmpty
-                            ? 'Sin Observaciones'
-                            : messageObservations,
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Cerrar"),
-                        ),
-                      ],
-                    ),
+                    builder: (context) {
+                      Offset offset = const Offset(0, 0);
+                      return StatefulBuilder(
+                        builder: (context, setState){
+                          return Center(
+                            child: GestureDetector(
+                              onPanUpdate: (details) {
+                                setState(() {
+                                  offset += details.delta;
+                                });
+                              },
+                              child: Transform.translate(
+                                offset: offset,
+                                child: Material(
+                                  color: Colors.transparent,
+                                  child: AlertDialog(
+                                    title: const Text("Observaciones"),
+                                    content: Text(
+                                      messageObservations.isEmpty
+                                          ? 'Sin Observaciones'
+                                          : messageObservations,
+                                    ),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () => Navigator.pop(context),
+                                        child: const Text("Cerrar"),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                      );
+                    }
                   );
                 },
                 child: Text(
