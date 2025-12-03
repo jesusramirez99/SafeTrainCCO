@@ -446,9 +446,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(train.destino, Colors.black),
       _buildCell(train.estacionActual, Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(15)}${train.carros ?? ''}\n'
+        '${'Cargados'.padRight(15)}${train.cargados ?? ''}\n'
         '${'Vacios'.padRight(18)}${train.vacios ?? ''}\n'
-        '${'Total'.padRight(20)}${train.cargados ?? ''}\n',
+        '${'Total'.padRight(20)}${train.carros ?? ''}\n',
         Colors.black,
       ),
 
