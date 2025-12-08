@@ -123,56 +123,61 @@ class TablesTrainsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshTableDataTrain(
+  Future<bool> refreshTableDataTrain(
       BuildContext context, String train, String estacion) async {
     _isLoading = true;
     notifyListeners();
+    bool success = false;
 
     try {
       final url = Uri.parse(
           '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(url);
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonData = json.decode(response.body);
-        final dataTren = jsonData['DataTren'];
+      if(response.statusCode != 200){
+        _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}',
+        );
+        return false;
+      }
 
-        if (dataTren == null) {
-          _showFlushbar(
-              context, 'No se encontraron datos para el tren "$train".');
-          return;
-        }
+      final jsonData = json.decode(response.body);
+      final dataTren = jsonData['DataTren'];
 
-        final wrapperData = dataTren['wrapper'];
-        if (wrapperData == null) {
-          _showFlushbar(context,
-              'No se encontraron datos en "wrapper" para el tren "$train".');
-          return;
-        }
+      if(dataTren == null){
+        _showFlushbar(context, 'No se encontraron datos para el tren "$train".');
+        return false;
+      }
 
-        final String? ID = wrapperData['ID']?.toString();
-        if (ID == null || ID.isEmpty) {
-          _showFlushbar(context, 'El tren "$train" no tiene un ID válido.');
-          return;
-        }
+      final wrapperData = dataTren['wrapper'];
+      if (wrapperData == null) {
+        _showFlushbar(context,
+            'No se encuentra la informacion para el tren "$train".');
+        return false;
+      }
 
-        setSelectedID(ID);
+      final String? id = wrapperData['ID']?.toString();
+      if (id == null || id.isEmpty) {
+        _showFlushbar(context, 'El tren "$train" no tiene un ID válido.');
+        return false;
+      }
+
+      setSelectedID(id);
         setObservaciones(wrapperData['observaciones'] ?? 'Sin observaciones');
         setMotivosRechazo((wrapperData['motivos_rechazo'] as List<dynamic>?)
                 ?.map((m) => m['motivo'].toString())
                 .toList() ??
-            []);
-
-        notifyListeners();
-      } else {
-        _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}');
-      }
+            []
+        );
+      
+      success = true;
     } catch (e) {
       _showFlushbar(context, 'Ocurrió un error: $e');
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+    return success;
   }
 
   // FUNCION PARA VER EL CONSIST DEL TREN

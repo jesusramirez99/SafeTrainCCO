@@ -446,9 +446,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(train.destino, Colors.black),
       _buildCell(train.estacionActual, Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(15)}${train.cargados ?? ''}\n'
-        '${'Vacios'.padRight(18)}${train.vacios ?? ''}\n'
-        '${'Total'.padRight(20)}${train.carros ?? ''}\n',
+        '${'Cargados'.padRight(20)}${(train.cargados ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(20)}${(train.vacios ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(20)}${(train.carros ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -481,6 +481,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
         train.autorizado ?? 'Autorizado',
         train.autorizado == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        train.idTren,
+        train.estacionActual,
         train.observ_autorizado
       ),
 
@@ -685,9 +687,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       _buildCell(data['IdTren']?.toString() ?? '', Colors.black),
       _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(15)}${data['cargados'] ?? ''}\n'
-        '${'Vacios'.padRight(18)}${data['vacios'] ?? ''}\n'
-        '${'Total'.padRight(20)}${data['carros'] ?? ''}\n',
+        '${'Cargados'.padRight(20)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(20)}${(data['vacios'] ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(20)}${(data['carros'] ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -731,6 +733,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
         data['autorizado']?.toString() ?? 'Autorizado',
         data['autorizado'] == 'Autorizado' ? Colors.green : Colors.red,
         context,
+        data['IdTren'],
+        data['estacion_actual'],
         data['observ_autorizado'].toString(),
       ),
 
@@ -923,16 +927,15 @@ class _DataTrainTableState extends State<DataTrainTable> {
     );
   }
 
-  DataCell _buildStatusCell(
-      String text, Color textColor, BuildContext context, [String? messageObservations]) {
-    final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
-    final tablesProvider =
-        Provider.of<TablesTrainsProvider>(context, listen: false);
-    final String tren = trenProvider.trenYFecha ?? '';
-
-    final estacionProvider =
+  DataCell _buildStatusCell(String text, Color textColor, BuildContext context, String idTren, String estacion, [String? messageObservations]) {
+    //print('tren: $idTren, estacion: $estacionAct');
+    //final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
+    final tablesProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
+    //final String tren = trenProvider.trenYFecha ?? '';
+    /*final estacionProvider =
         Provider.of<EstacionesProvider>(context, listen: false);
-    final String estacion = estacionProvider.selectedEstacion ?? '';
+    final String estacion = estacionProvider.selectedEstacion ?? '';*/
+    //print('Datos del tren....tren: $idTren, estacion: $estacion');
 
     return DataCell(
       MouseRegion(
@@ -941,8 +944,10 @@ class _DataTrainTableState extends State<DataTrainTable> {
             : SystemMouseCursors.basic,
         child: GestureDetector(
           onTap: () async {
-            if ((text == 'Rechazado') && (tren.isEmpty || estacion.isEmpty)) {
-              await tablesProvider.refreshTableDataTrain(context, tren, estacion);
+            if ((text == 'Rechazado' && idTren.isNotEmpty || estacion.isNotEmpty)) {
+              final hasInfo = await tablesProvider.refreshTableDataTrain(context, idTren, estacion);
+              if(!hasInfo)return;
+
               if (context.mounted) {
                 showDialog(
                   context: context,
@@ -998,8 +1003,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
             fontSize: 15.0,
             fontWeight: FontWeight.bold,
             color: textColor,
+            fontFamily: 'RobotoMono',
           ),
-          textAlign: TextAlign.center,
+          textAlign: TextAlign.left,
         ),
       ),
     );
