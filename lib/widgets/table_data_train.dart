@@ -944,33 +944,82 @@ class _DataTrainTableState extends State<DataTrainTable> {
             : SystemMouseCursors.basic,
         child: GestureDetector(
           onTap: () async {
-            if ((text == 'Rechazado' && idTren.isNotEmpty || estacion.isNotEmpty)) {
+            if ((text == 'Rechazado' && (idTren.isNotEmpty && estacion.isNotEmpty))) {
               final hasInfo = await tablesProvider.refreshTableDataTrain(context, idTren, estacion);
               if(!hasInfo)return;
 
               if (context.mounted) {
                 showDialog(
                   context: context,
-                  builder: (context) => const MostrarRechazoObsTrenes(),
+                  barrierDismissible: true,
+                  builder: (context){
+                    Offset offset = const Offset(0, 0);
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta;
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: const Material(
+                                color: Colors.transparent,
+                                child: MostrarRechazoObsTrenes(),
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                    );
+                  }
                 );
               }
             } else if(text == 'Autorizado'){
-              if(context.mounted){
+              if (context.mounted) {
                 showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text("Observaciones"),
-                      content: Text(
-                        messageObservations == null || messageObservations.isEmpty? 'Sin observaciones' : messageObservations,
-                      ),
-                      actions: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text("Cerrar"),
-                        ),
-                      ],
-                    ),
-                  );
+                  context: context,
+                  builder: (context) {
+                    Offset offset = Offset.zero; // posición inicial
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        //Offset offset = Offset.zero; // posición inicial
+
+                        return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta; // actualizar posición
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: AlertDialog(
+                                  title: const Text("Observaciones"),
+                                  content: Text(
+                                    messageObservations == null || messageObservations.isEmpty
+                                        ? 'Sin observaciones'
+                                        : messageObservations,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Cerrar"),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
               }
             }
           },

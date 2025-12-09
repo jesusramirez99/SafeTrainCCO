@@ -24,7 +24,6 @@ class MostrarRechazoObsTrenes extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🔥 Lista de motivos de rechazo
             idTren.motivosRechazo.isNotEmpty
                 ? Column(
                     children: idTren.motivosRechazo
@@ -38,7 +37,7 @@ class MostrarRechazoObsTrenes extends StatelessWidget {
                                       color: Colors.orange),
                                   const SizedBox(
                                       width:
-                                          8.0), // Espacio entre icono y texto
+                                          8.0), 
                                   Text(
                                     motivo,
                                     style: TextStyle(
@@ -55,7 +54,6 @@ class MostrarRechazoObsTrenes extends StatelessWidget {
                     style: TextStyle(fontSize: 16.0),
                   ),
             const SizedBox(height: 17.0),
-            // 🔥 Observaciones
             const Text(
               'Observaciones:',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
