@@ -8,7 +8,12 @@ import 'package:safe_train_cco/modelos/tablas_tren_provider.dart';
 import 'package:safe_train_cco/modelos/user_provider.dart';
 
 class MotivoRechazoModal extends StatefulWidget {
-  const MotivoRechazoModal({super.key});
+  final String estacion;
+
+  const MotivoRechazoModal({
+    super.key, 
+    required this.estacion
+  });
 
   @override
   _MotivoRechazoModalState createState() => _MotivoRechazoModalState();
@@ -312,14 +317,11 @@ class _MotivoRechazoModalState extends State<MotivoRechazoModal> {
 
   // METODO PARA ACTUALIAR LOS DATOS DE LA TABLA
   void _refreshTableData(BuildContext context) async {
-    final trenYFechaModel =
-        Provider.of<TrenYFechaModel>(context, listen: false);
+    final trenYFechaModel = Provider.of<TrenYFechaModel>(context, listen: false);
     final tren = trenYFechaModel.trenYFecha;
+    final tablesProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
 
-    final tablesProvider =
-        Provider.of<TablesTrainsProvider>(context, listen: false);
-
-    await tablesProvider.tableDataTrain(context, tren!);
+    await tablesProvider.tableDataTrain(context, tren!, widget.estacion);
 
     print("El tren en el método handle es: $tren");
     print("Tabla actualizada correctamente.");

@@ -295,6 +295,8 @@ class MenuLateralState extends State<MenuLateral> {
       builder: (context, estatusProvider, selectionNotifier, child) {
         int? selectedIndex = selectionNotifier.selectedRowNotifier.value;
         String estatus = estatusProvider.estatusCCO;
+        final estacionProvider = Provider.of<EstacionesProvider>(context);
+        final estacion = estacionProvider.selectedEstacion;
 
         bool isDisabled = estatus == 'Rechazado' ||
                 estatus == 'Autorizado' ||
@@ -311,7 +313,9 @@ class MenuLateralState extends State<MenuLateral> {
                   final bool? isRejected = await showDialog<bool>(
                     barrierDismissible: false,
                     context: context,
-                    builder: (ctx) => MotivoRechazoModal(),
+                    builder: (ctx) => MotivoRechazoModal(
+                      estacion: estacion ?? '',
+                    ),
                   );
 
                   if (isRejected == true) {
@@ -365,9 +369,11 @@ class MenuLateralState extends State<MenuLateral> {
     final trenYFechaModel =
         Provider.of<TrenYFechaModel>(context, listen: false);
     final tren = trenYFechaModel.trenYFecha;
+    final estacionProvider = Provider.of<EstacionesProvider>(context);
+    final estacion = estacionProvider.selectedEstacion;
     //widget.toggleTableData();
     Provider.of<TablesTrainsProvider>(context, listen: false)
-        .tableDataTrain(context, tren!);
+        .tableDataTrain(context, tren!, estacion);
     print("el tren en el metodo handle es: $tren");
   }
 

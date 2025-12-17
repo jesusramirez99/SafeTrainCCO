@@ -30,7 +30,6 @@ class ModalAutorizarTren extends StatefulWidget {
     required this.fechaController,
     required this.horaController,
     required this.observacionesController,
-
   });
 
   @override
@@ -657,7 +656,7 @@ class _ModalAutorizarTrenState extends State<ModalAutorizarTren> {
     final tablesProvider =
         Provider.of<TablesTrainsProvider>(context, listen: false);
 
-    await tablesProvider.tableDataTrain(context, tren!);
+    await tablesProvider.tableDataTrain(context, tren!, widget.estacion);
 
     print("El tren en el método handle es: $tren");
     print("Tabla actualizada correctamente.");

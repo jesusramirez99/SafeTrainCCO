@@ -175,9 +175,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     final isLoading = ofrecimientoProvider.isLoading;
     final errorMessage = ofrecimientoProvider.errorMessage;
     final trainProvider = Provider.of<TrenYFechaModel>(context, listen: true);
-    final selectionNotifier =
-        Provider.of<SelectionNotifier>(context, listen: false);
-
+    final selectionNotifier = Provider.of<SelectionNotifier>(context, listen: false);
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final user = userProvider.userName;
 
@@ -196,6 +194,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
               (Route<dynamic> route) => false,
             );
 
+            final estacion = trainId.split('-').last.trim();
+
             trainProvider.setTrenYFecha(trainId);
 
             widget.idTrainController.text =
@@ -204,7 +204,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             final tableProvider =
                 Provider.of<TablesTrainsProvider>(context, listen: false);
 
-            tableProvider.tableDataTrain(context, trainProvider.trenYFecha!);
+            tableProvider.tableDataTrain(context, trainProvider.trenYFecha!, estacion);
 
             widget.idTrainFocusNode.requestFocus();
           },
@@ -235,6 +235,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
             }
 
             return trenesOfrecidos.map((train) {
+              print(train);
               return PopupMenuItem<String>(
                 value: train,
                 child: Text(train),

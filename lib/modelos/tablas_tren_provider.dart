@@ -11,9 +11,11 @@ class TablesTrainsProvider extends ChangeNotifier {
   List<Map<String, dynamic>> _infoTrain = [];
   List<Map<String, dynamic>> _dataTrainsOffered = [];
   List<Map<String, dynamic>> _dataTrain = [];
+  List<dynamic> _wrapperData = [];
 
   List<Map<String, dynamic>> get dataTrain => _dataTrain;
   List<Map<String, dynamic>> get dataTrainsOffered => _dataTrainsOffered;
+  List<dynamic> get WrapperData => _wrapperData;
 
   String? _selectedID;
   bool _isLoading = false;
@@ -69,13 +71,12 @@ class TablesTrainsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> tableDataTrain(BuildContext context, String idTren) async {
+  Future<void> tableDataTrain(BuildContext context, String idTren, [String? estacion]) async {
     _isLoading = true;
     _trainDataInfo = false;
     notifyListeners();
 
-    final url =
-        '${Enviroment.baseUrl}/getInfoTrenCCOOfrecido?idTren=$idTren';
+    final url = '${Enviroment.baseUrl}/getInfoTrenCCOOfrecidoEstacion?idTren=$idTren&estacion=$estacion';
 
     try {
       final response = await http.get(Uri.parse(url));
