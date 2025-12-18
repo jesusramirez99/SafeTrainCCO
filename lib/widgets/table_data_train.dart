@@ -390,9 +390,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn(label: _buildHeaderCell('Estatus\nCCO')),
       DataColumn(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado')),
       //DataColumn(label: _buildHeaderCell('Autorizado')),
-      DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
-      DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
-      DataColumn(label: _buildHeaderCell('Registro de \nSalida'))
+      //DataColumn(label: _buildHeaderCell('Fecha Envío\n de Llamado')),
+      //DataColumn(label: _buildHeaderCell('Fecha\nLlamado')),
+      DataColumn(label: _buildHeaderCell('Salida de \nTerminal'))
     ];
   }
 
@@ -496,7 +496,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       ),
 
       // Fecha Envio de Llamado
-      _buildCellDateString(
+      /*_buildCellDateString(
         text: train.llamadoPor.toString() ?? '',
         widget: formattedDateCell(
           date: train.autorizado == 'Rechazado'
@@ -513,7 +513,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
           date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
-      ),
+      ),*/
 
       // Fecha llamada completada
       _buildCellDateString(
@@ -637,9 +637,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       DataColumn2(label: _buildHeaderCell('Fecha\nOfrecido'), size: ColumnSize.S),
       DataColumn2(label: _buildHeaderCell('Estatus\nCCO'), size: ColumnSize.S),
       DataColumn2(label: _buildHeaderCell('Fecha CCO\nAutorizado / Rechazado'), size: ColumnSize.S),
-      DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
-      DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
-      DataColumn2(label: _buildHeaderCell('Registro de \nSalida'), size: ColumnSize.S)
+      //DataColumn2(label: _buildHeaderCell('Fecha Envío\n de Llamado'), size: ColumnSize.S),
+      //DataColumn2(label: _buildHeaderCell('Fecha\nLlamado'), size: ColumnSize.S),
+      DataColumn2(label: _buildHeaderCell('Salida de \nTerminal'), size: ColumnSize.S)
     ];
   }
 
@@ -750,7 +750,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
    
       
       // Fecha Envio de Llamado
-      _buildCellDateString(
+      /*_buildCellDateString(
         text: data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
@@ -769,7 +769,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
                   date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
-      ),
+      ),*/
 
       // Fecha llamada completada
       _buildCellDateString(
