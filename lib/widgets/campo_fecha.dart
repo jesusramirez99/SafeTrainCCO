@@ -91,12 +91,35 @@ class FechaState extends State<Fecha> {
   }
 
   Future<DateTime?> _selectDate(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1990),
-      lastDate: DateTime(2050),
-    );
-    return picked;
+  DateTime selectedDate = DateTime.now();
+      return await showDialog<DateTime>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            content: SizedBox(
+              height: 300,
+              width: 300,
+              child: CalendarDatePicker(
+                initialDate: selectedDate,
+                firstDate: DateTime(1990),
+                lastDate: DateTime(2050),
+                onDateChanged: (date) {
+                  selectedDate = date;
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancelar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, selectedDate),
+                child: const Text('Aceptar'),
+              ),
+            ],
+          );
+        },
+      );
   }
 }

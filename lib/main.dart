@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modelos/autorizar_tren_provider.dart';
@@ -62,6 +63,17 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      supportedLocales: const[
+        Locale('es', 'ES'),
+      ],
+
+      localizationsDelegates: const[
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+
+      locale: const Locale('es', 'ES'),  
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!, 
         breakpoints: [
