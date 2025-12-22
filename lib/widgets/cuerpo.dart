@@ -36,7 +36,7 @@ class Cuerpo extends StatefulWidget {
     required this.showTime,
     required this.idTrainController,
     required this.fechaController,
-    required this.focusNode,
+    required this.focusNode, 
   });
 
   @override
@@ -45,7 +45,7 @@ class Cuerpo extends StatefulWidget {
 
 class CuerpoState extends State<Cuerpo> {
   TextEditingController controllerEstacion = TextEditingController();
-
+  String _estacionSeleccionada = '';
   bool _isHovered = false;
   bool _enabledIdTrain = false;
   bool _enabledFecha = false;
@@ -101,6 +101,7 @@ class CuerpoState extends State<Cuerpo> {
   void initState() {
     super.initState();
     _dropdownValue = null;
+    
     Future.microtask(() =>
         Provider.of<EstacionesProvider>(context, listen: false)
             .fetchEstaciones());
@@ -131,6 +132,7 @@ class CuerpoState extends State<Cuerpo> {
 
       String idTrain = widget.idTrainController.text;
       String fecha = widget.fechaController.text;
+      String estacion = _estacionSeleccionada;
 
       if (fecha.length >= 2) {
         String dia = fecha.substring(0, 2);
@@ -148,11 +150,12 @@ class CuerpoState extends State<Cuerpo> {
 
         _trenYFecha = '$idTrain$espacios$dia';
         print('datos del tren: $_trenYFecha');
+        print('estacion: $estacion');
 
         final provider =
             Provider.of<TablesTrainsProvider>(context, listen: false);
 
-        await provider.tableDataTrain(context, _trenYFecha);
+        await provider.tableDataTrain(context, _trenYFecha, estacion);
 
         if (provider.trainData == null) {
           showFlushbar(
@@ -478,7 +481,10 @@ class CuerpoState extends State<Cuerpo> {
                     final selectedStation = estaciones.firstWhere(
                       (station) => station['id_estacion'] == selection,
                     );
-
+                    setState(() {
+                      _estacionSeleccionada = selectedStation['id_estacion'];
+                    });
+  
                     // Actualizamos la estación seleccionada en el provider
                     estacionesProvider
                         .updateSelectedEstacion(selectedStation['id_estacion']);
@@ -498,6 +504,10 @@ class CuerpoState extends State<Cuerpo> {
                             fontSize: isLaptop? 14.0 : 16.0,
                           ),
                           onChanged: (text) {
+                            setState(() {
+                              _estacionSeleccionada = '';
+                            });
+
                             // Si el texto supera el límite actual, recortarlo
                             if (text.length > maxLength) {
                               controller.value = controller.value.copyWith(

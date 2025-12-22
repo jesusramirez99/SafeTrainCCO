@@ -21,6 +21,7 @@ class HomeState extends State<Home> {
   final GlobalKey<CuerpoState> _cuerpoKey = GlobalKey<CuerpoState>();
   final TextEditingController _idTrainController = TextEditingController();
   final TextEditingController _fechaController = TextEditingController();
+  final TextEditingController _estacionController = TextEditingController();
   final FocusNode _idTrainFocusNode = FocusNode();
 
   void _toggleTableData() {
@@ -106,7 +107,7 @@ class HomeState extends State<Home> {
               showTime: _showHora,
               idTrainController: _idTrainController,
               fechaController: _fechaController,
-              focusNode: _idTrainFocusNode,
+              focusNode: _idTrainFocusNode, 
             ),
           ),
         ],
