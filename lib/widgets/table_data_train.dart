@@ -499,9 +499,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       _buildCellDateString(
         text: train.llamadoPor.toString() ?? '',
         widget: formattedDateCell(
-          date: train.autorizado == 'Rechazado'
-              ? ''
-              : train.fechaAutorizadoRechazado.toString() ?? '',
+          date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
