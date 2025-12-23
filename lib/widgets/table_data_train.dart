@@ -779,7 +779,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
-                  date: data['fecha_autorizado']?.toString() ?? '',
+                  date: data['fecha_llamado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
       ),
