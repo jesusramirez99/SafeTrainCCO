@@ -10,7 +10,7 @@ class MotivoRechazoProvider with ChangeNotifier {
 
   // Método para cargar los datos
   Future<void> cargarMotivosRechazo() async {
-    const url = '${Enviroment.baseUrl}/getMotivoRecahzo';
+    String url = '${Enviroment.baseUrl}/getMotivoRecahzo';
     try {
       final response = await http.get(Uri.parse(url));
       if (response.statusCode == 200) {
