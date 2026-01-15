@@ -1,11 +1,9 @@
 import 'dart:js_interop';
 
 @JS('env')
-external EnvJS get _env;
+external JSObject get _env;
 
-@JS()
-@anonymous
-class EnvJS{
+extension EnvJS on JSObject{
   external String get BASE_URL;
   external String get BASE_URL1;
 }
