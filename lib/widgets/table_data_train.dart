@@ -379,7 +379,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //DataColumn(label: _buildHeaderCell('Tren')),
       //DataColumn(label: _buildHeaderCell('Estación\nOrigen')),
       //DataColumn(label: _buildHeaderCell('Estación\nDestino')),
-      DataColumn(label: _buildHeaderCell('Tren/Estación\nActual')),
+      DataColumn(label: _buildHeaderCell('Estación\nActual')),
       DataColumn(label: _buildHeaderCell('Carros')),
       //DataColumn(label: _buildHeaderCell('Cargados')),
       //DataColumn(label: _buildHeaderCell('Vacíos')),
