@@ -497,9 +497,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: train.llamadoPor.toString() ?? '',
+        text: train.autorizadorPor.toString() ?? '',
         widget: formattedDateCell(
-          date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado ?? '',
+          date: train.autorizado == 'Rechazado' ? '' : train.fechaAutorizadoRechazado ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
@@ -785,11 +785,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
       
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
-                  date: data['fecha_llamado']?.toString() ?? '',
+                  date: data['fecha_autorizado']?.toString() ?? '',
                   format: 'dd/MM/yyyy \n HH:mm',
                 ),
       ),
