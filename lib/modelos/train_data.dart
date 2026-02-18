@@ -24,6 +24,8 @@ class TrainData {
   final String observaciones;
   final String observ_ofrecimiento;
   final String observ_autorizado;
+  final String fecha_salida_rc2;
+  final String fecha_salida_lector;
 
   TrainData({
     required this.id,
@@ -51,6 +53,8 @@ class TrainData {
     required this.autorizadorPor,
     required this.observ_ofrecimiento,
     required this.observ_autorizado,
+    required this.fecha_salida_rc2,
+    required this.fecha_salida_lector,
   });
 
   factory TrainData.fromJson(Map<String, dynamic> json) {
@@ -80,7 +84,9 @@ class TrainData {
       autorizadorPor: data['autorizado_por'] ?? '',
       observaciones: data['observaciones'] ?? '',
       observ_ofrecimiento: data['observ_ofrecimiento'] ?? '',    
-      observ_autorizado: data['observ_autorizado']?? ''
+      observ_autorizado: data['observ_autorizado']?? '',
+      fecha_salida_rc2: data['fecha_salida_rc2']?? '',
+      fecha_salida_lector: data['fecha_salida_lector']?? '',
     );
   }
 }

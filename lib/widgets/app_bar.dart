@@ -189,24 +189,15 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ofrecimientoProvider.fetchOfrecimientos(context, user!),
           onSelected: (trainId) {
             selectionNotifier.updateSelectedRow(null);
+            
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const Home()),
               (Route<dynamic> route) => false,
             );
-
-            final estacion = trainId.split('-').last.trim();
-
             trainProvider.setTrenYFecha(trainId);
-
-            widget.idTrainController.text =
-                trainId.substring(0, trainId.length - 2);
-
-            final tableProvider =
-                Provider.of<TablesTrainsProvider>(context, listen: false);
-
-            tableProvider.tableDataTrain(context, trainProvider.trenYFecha!, estacion);
-
-            widget.idTrainFocusNode.requestFocus();
+            final estacion = trainId.split('-').last.trim();
+            final idtren = trainId.split('-').first.trim();
+            Provider.of<TablesTrainsProvider>(context, listen: false).tableDataTrain(context, idtren, estacion);       
           },
           itemBuilder: (BuildContext context) {
             if (isLoading) {

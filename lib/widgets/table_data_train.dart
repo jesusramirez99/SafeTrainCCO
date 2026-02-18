@@ -506,7 +506,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Llamado
       _buildCellDateString(
-        text: train.llamadoPor.toString() ?? '',
+        text: train.llamadoPor.toString()?? '',
         widget: formattedDateCell(
           date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado ?? '',
           format: 'dd/MM/yyyy \n HH:mm',
@@ -515,17 +515,27 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       buildCellExitterminal(
-        widget: const Column(
+        widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'RC2    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              train.fecha_salida_rc2.isNotEmpty? 
+              'RC2  ${formattedDateCell(
+                date: train.fecha_salida_rc2.toString(),
+                format: 'dd/MM/yyyy \n HH:mm',
+                ) 
+              }' : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10), // Espaciado entre las dos celdas
+            const SizedBox(height: 10), // Espaciado entre las dos celdas
             Text(
-              'AEI    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              train.fecha_salida_lector.isNotEmpty? 
+              'AEI  ${formattedDateCell(
+                date: train.fecha_salida_lector.toString(),
+                format: 'dd/MM/yyyy \n HH:mm',
+              )}' 
+              : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
@@ -797,17 +807,28 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha llamada completada
       buildCellExitterminal(
-        widget: const Column(
+        widget: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'RC2    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+
+              data['fecha_salida_rc2'] != null ?
+              'RC2  ${formattedDateCellTrainsOffered(
+                date: data['fecha_salida_rc2']?.toString() ?? '',
+                format: 'dd/MM/yyyy \n HH:mm',
+              )}' 
+              : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 10), // Espaciado entre las dos celdas
+            const SizedBox(height: 10), // Espaciado entre las dos celdas
             Text(
-              'AEI    ',
-              style: TextStyle(fontWeight: FontWeight.bold),
+              data['fecha_salida_lector'] != null ?
+              'AEI  ${formattedDateCellTrainsOffered(
+                date: data['fecha_salida_lector']?.toString() ?? '',
+                format: 'dd/MM/yyyy \n HH:mm',
+              )}'
+              : '',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ],
         ),
