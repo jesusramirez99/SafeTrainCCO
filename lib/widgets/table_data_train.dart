@@ -439,7 +439,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
         );
       }
     }
-
+    print('estacion ACtual: ${train.estacionActual}');
     return [
       //_buildCell(train.idTren, Colors.black),
       //_buildCell(train.origen, Colors.black),
@@ -718,7 +718,12 @@ class _DataTrainTableState extends State<DataTrainTable> {
     }
 
     return [
-      _buildCell(data['IdTren']?.toString() ?? '', Colors.black),
+      _buildCellIdTrain(
+        id: data['IdTren']?.toString() ?? '',
+        station: data['estacion_actual']?.toString() ?? '', 
+      ),
+
+
       _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
       _buildCell(
         '${'Cargados'.padRight(20)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
@@ -781,8 +786,6 @@ class _DataTrainTableState extends State<DataTrainTable> {
         ),
       ),
 
-   
-      
       // Fecha Envio de Llamado
       _buildCellDateString(
         text: data['autorizado_por']?.toString() ?? '', 
@@ -898,6 +901,39 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 ),
           ],
         ),
+      ),
+    );
+  }
+
+  DataCell _buildCellIdTrain({
+    required String id,
+    required String station,
+    Color color = Colors.black,
+  }){
+    return DataCell(
+      Center(
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child:  GestureDetector(
+            onTap: () {
+              final trainProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
+              trainProvider.tableDataTrain(
+                context, 
+                id,  
+                station
+              );
+            },
+            child: Text(
+              id,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              textAlign:  TextAlign.center,
+            ),
+          ),
+        ),  
       ),
     );
   }

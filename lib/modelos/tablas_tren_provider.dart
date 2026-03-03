@@ -124,20 +124,17 @@ class TablesTrainsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> refreshTableDataTrain(
-      BuildContext context, String train, String estacion) async {
+  Future<bool> refreshTableDataTrain(BuildContext context, String train, String estacion) async {
     _isLoading = true;
     notifyListeners();
     bool success = false;
 
     try {
-      final url = Uri.parse(
-          '${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
+      final url = Uri.parse('${Enviroment.baseUrl}/getDataTren?idTren=$train&estacion=$estacion');
       final response = await http.get(url);
 
       if(response.statusCode != 200){
-        _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}',
-        );
+        _showFlushbar(context, 'Error en la solicitud: ${response.statusCode}',);
         return false;
       }
 
@@ -151,8 +148,7 @@ class TablesTrainsProvider extends ChangeNotifier {
 
       final wrapperData = dataTren['wrapper'];
       if (wrapperData == null) {
-        _showFlushbar(context,
-            'No se encuentra la informacion para el tren "$train".');
+        _showFlushbar(context, 'No se encuentra la informacion para el tren "$train".');
         return false;
       }
 
@@ -163,13 +159,12 @@ class TablesTrainsProvider extends ChangeNotifier {
       }
 
       setSelectedID(id);
-        setObservaciones(wrapperData['observaciones'] ?? 'Sin observaciones');
-        setMotivosRechazo((wrapperData['motivos_rechazo'] as List<dynamic>?)
-                ?.map((m) => m['motivo'].toString())
-                .toList() ??
-            []
-        );
-      
+      setObservaciones(wrapperData['observaciones'] ?? 'Sin observaciones');
+      setMotivosRechazo((wrapperData['motivos_rechazo'] as List<dynamic>?)
+              ?.map((m) => m['motivo'].toString())
+              .toList() ??
+          []
+      );
       success = true;
     } catch (e) {
       _showFlushbar(context, 'Ocurrió un error: $e');
