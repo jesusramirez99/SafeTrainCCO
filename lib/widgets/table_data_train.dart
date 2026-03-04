@@ -11,6 +11,7 @@ import 'package:safe_train_cco/modelos/change_notifier_provider.dart';
 import 'package:safe_train_cco/modelos/estaciones_provider.dart';
 import 'package:safe_train_cco/modelos/tablas_tren_provider.dart';
 import 'package:safe_train_cco/modelos/user_provider.dart';
+import 'package:safe_train_cco/widgets/HoverTrainTextState.dart';
 
 class DataTrainTable extends StatefulWidget {
   final List<Map<String, dynamic>> data;
@@ -912,28 +913,11 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }){
     return DataCell(
       Center(
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          child:  GestureDetector(
-            onTap: () {
-              final trainProvider = Provider.of<TablesTrainsProvider>(context, listen: false);
-              trainProvider.tableDataTrain(
-                context, 
-                id,  
-                station
-              );
-            },
-            child: Text(
-              id,
-              style: TextStyle(
-                fontSize: 15.0,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
-              textAlign:  TextAlign.center,
-            ),
-          ),
-        ),  
+        child: HoverTrainText(
+          id: id, 
+          station: station, 
+          color: color
+        ), 
       ),
     );
   }
