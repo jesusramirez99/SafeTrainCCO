@@ -124,7 +124,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
               Center(
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(
-                    maxWidth: 1000,
+                    maxWidth: 2000,
                   ),
                   child: ScrollbarTheme(
                     data: ScrollbarThemeData( 
