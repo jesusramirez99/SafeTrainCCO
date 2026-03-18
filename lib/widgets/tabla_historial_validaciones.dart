@@ -7,6 +7,7 @@ import 'package:safe_train_cco/modales/motivos_rechazos_obs_id.dart';
 import 'package:safe_train_cco/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train_cco/modelos/rechazos_observaciones_data_provider.dart';
 import 'package:safe_train_cco/modelos/user_provider.dart';
+import 'package:safe_train_cco/widgets/custom_date.dart';
 
 class HistorialValidacionesModal extends StatefulWidget {
   final Future<void>? historialFuture;
@@ -30,6 +31,13 @@ class HistorialValidacionesModal extends StatefulWidget {
 
 class _HistorialValidacionesModalState extends State<HistorialValidacionesModal> {
   Offset _offset = Offset.zero;
+  final singleController = CustomDatePickerController();
+  final rangeController  = CustomDatePickerController();
+  final ValueNotifier<bool> singleSelected = ValueNotifier(false);
+  final ValueNotifier<bool> rangeSelected = ValueNotifier(false);
+  final TextEditingController controllertren = TextEditingController();
+  final TextEditingController controllerfecha = TextEditingController();
+  final TextEditingController controllerestacion = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +45,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
     final tren = trenProvider.trenYFecha;
 
-    final TextEditingController controllertren = TextEditingController();
-    final TextEditingController controllerfecha = TextEditingController();
+
 
     return FutureBuilder(
       future: widget.historialFuture ?? Future.value(), // Manejar Future null
@@ -95,7 +102,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                           children: [
                             _buildTitle(tren ?? 'Sin Tren'),
                             const SizedBox(height: 16.0),
-                            _buildSearchBar(context, controllertren, controllerfecha),
+                            _buildSearchBar(context, controllertren, controllerestacion, singleController, rangeController),
                             const SizedBox(height: 22.0),
                             validationHistory.isNotEmpty
                                 ? Flexible(
@@ -128,11 +135,68 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   Widget _buildSearchBar(
       BuildContext context,
       TextEditingController controllerTren,
-      TextEditingController controllerFecha) {
+      TextEditingController controllerestacion,
+      CustomDatePickerController singleController,
+      CustomDatePickerController rangeController) {
     // Función para realizar la búsqueda concatenando los dos campos
-    Future<void> performSearch(
-        BuildContext context, String trenId, String fecha) async {
-      if (trenId.isNotEmpty && fecha.isNotEmpty) {
+    Future<void> performSearch(BuildContext context) async {
+
+      final trenId = controllerTren.text.trim();
+      final estacion = controllerestacion.text.trim();
+      String fecha = '';
+
+      if(singleController.singleDate != null){
+        fecha = DateFormat('dd').format(singleController.singleDate!);
+      }else if(rangeController.range != null){
+        final start = DateFormat('dd').format(rangeController.range!.start);
+        final end = DateFormat('dd').format(rangeController.range!.end);
+
+        fecha = '$start-$end';
+      }
+
+      if(trenId.isEmpty && fecha.isEmpty && estacion.isEmpty){
+        _showFlushbar(
+          context, 
+          'Favor de ingresar al menos un dato de busqueda', 
+          Colors.red.shade400,
+        );
+        return;
+      }
+
+      final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
+      String formattedTrenId = trenId;
+      int trenIdLength = trenId.length;
+
+      if (trenIdLength == 5) {
+        formattedTrenId = '$trenId   '; // 3 espacios
+      } else if (trenIdLength == 6) {
+        formattedTrenId = '$trenId  '; // 2 espacios
+      } else if (trenIdLength == 7) {
+        formattedTrenId = '$trenId '; // 1 espacio
+      } else if (trenIdLength == 8) {
+        formattedTrenId = trenId; // Sin espacios
+      }
+
+      final searchQuery = '$formattedTrenId$fecha$estacion';
+      print("busqueda: $searchQuery");
+      print('busqueda:'+searchQuery);
+
+      await provider.historialValidaciones(searchQuery);
+
+      if(provider.validationHistory.isEmpty){
+        _showFlushbar(
+          context, 
+          'El tren $searchQuery no existe', 
+          Colors.red.shade400,
+        );
+      }
+
+
+
+      
+
+
+      /*if (trenId.isNotEmpty && fecha.isNotEmpty) {
         final provider = Provider.of<HistorialValidacionesProvider>(
           context,
           listen: false,
@@ -168,7 +232,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
       } else {
         _showFlushbar(context, 'Favor de ingresar un tren válido y una fecha',
             Colors.red.shade400);
-      }
+      }*/
     }
 
     return Row(
@@ -197,41 +261,95 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         const SizedBox(width: 12.0), // Espacio entre los dos campos
 
         // TextFormField para Fecha, permite solo 2 caracteres numéricos
+
+
+        Row(
+          children: [
+
+           SizedBox(
+              width: 150,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: rangeSelected,
+                builder: (_, range, __) {
+                  return CustomDatePicker(
+                    mode: PickerMode.single,
+                    label: 'Fecha',
+                    controller: singleController,
+                    enabled: !range,
+                    onSingle: (date) {
+                      singleSelected.value = date != null;
+                      if (date != null) rangeSelected.value = false;
+                    },
+                  );
+                },
+              ),
+            ),
+
+
+        const SizedBox(width: 12.0),
+
         SizedBox(
-          width: 70,
+              width: 250,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: singleSelected,
+                builder: (_, single, __) {
+                  return CustomDatePicker(
+                    mode: PickerMode.range,
+                    label: 'Periodo',
+                    controller: rangeController,
+                    enabled: !single,
+                    onRange: (range) {
+                      rangeSelected.value = range != null;
+                      if (range != null) singleSelected.value = false;
+                    },
+                  );
+                },
+              ),
+        ),
+          ]
+        ),
+
+        const SizedBox(width: 15.0),
+
+        SizedBox(
+          width: 100,
           child: TextFormField(
-            controller: controllerFecha,
+            controller: controllerestacion,
+            onChanged: (text) {
+              final upperText = text.toUpperCase();
+              controllerestacion.value = TextEditingValue(
+                text: upperText,
+                selection: TextSelection.collapsed(offset: upperText.length),
+              );
+            },
             inputFormatters: [
-              LengthLimitingTextInputFormatter(2),
-              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(7),
+              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]'))
             ],
             decoration: const InputDecoration(
-              labelText: 'Fecha',
+              labelText: 'Estación',
               border: OutlineInputBorder(),
             ),
-            keyboardType: TextInputType.number,
-            onFieldSubmitted: (value) async {
-              final trenId = controllerTren.text.trim();
-              final fecha = controllerFecha.text.trim();
-              await performSearch(context, trenId, fecha);
-            },
           ),
         ),
+
+
         const SizedBox(width: 15.0),
         IconButton(
           icon: const Icon(Icons.search),
-          onPressed: () async {
-            final trenId = controllerTren.text.trim();
-            final fecha = controllerFecha.text.trim();
-            await performSearch(context, trenId, fecha);
-          },
+          onPressed: () => performSearch(context),
         ),
         const SizedBox(width: 12.0),
+
         IconButton(
           icon: const Icon(Icons.clear, color: Colors.red),
           onPressed: () {
             controllerTren.clear();
-            controllerFecha.clear();
+            controllerestacion.clear();
+            singleController.clear();
+            rangeController.clear();
+            singleSelected.value = false;
+            rangeSelected.value = false;         
           },
         ),
       ],
@@ -262,6 +380,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           child: DataTable(
             border: TableBorder.all(color: Colors.grey.shade300, width: 1.0),
             columnSpacing: 10.0,
+            dataRowHeight: 65.0,
             headingRowColor: MaterialStateProperty.all(Colors.black),
             columns: _buildTableHeaders(context),
             rows: validationHistory
@@ -280,16 +399,17 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
       _buildHeaderColumn('Estación\nDestino', context),
       _buildHeaderColumn('Estación\nActual', context),
       _buildHeaderColumn('Total\nCarros', context),
-      _buildHeaderColumn('Cargados', context),
-      _buildHeaderColumn('Vacíos', context),
-      _buildHeaderColumn('Validado', context),
+     /* _buildHeaderColumn('Cargados', context),
+      _buildHeaderColumn('Vacíos', context),*/
+      _buildHeaderColumn('Estatus\nValidación', context),
       _buildHeaderColumn('Fecha\nValidado', context),
-      _buildHeaderColumn('Ofrecido\nPor', context),
+      //_buildHeaderColumn('Ofrecido\nPor', context),
       _buildHeaderColumn('Fecha\nOfrecido', context),
       _buildHeaderColumn('Estatus\nCCO', context),
-      _buildHeaderColumn('Fecha\nAutorizado', context),
-      _buildHeaderColumn('Llamado\nPor', context),
+      _buildHeaderColumn('Estatus CCO\nAutorizado/Rechazado', context),
+      _buildHeaderColumn('Fecha Envio\nde Llamado', context),
       _buildHeaderColumn('Fecha\nLlamado', context),
+      _buildHeaderColumn('Salida de\nTerminal', context),
     ];
   }
 
@@ -322,13 +442,12 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         _buildDataCell(record['origen'] ?? '', Colors.black, context),
         _buildDataCell(record['destino'] ?? '', Colors.black, context),
         _buildDataCell(record['estacion_actual'] ?? '', Colors.black, context),
-        _buildDataCell(
-            record['carros']?.toString() ?? '', Colors.black, context),
-        _buildDataCell(
-            record['cargados']?.toString() ?? '', Colors.black, context),
-        _buildDataCell(
-            record['vacios']?.toString() ?? '', Colors.black, context),
-
+        _buildDataCellCars(
+          '${'Cargados'.padRight(15)}${record['cargados'] ?? ''}\n'
+          '${'Vacios'.padRight(18)}${record['vacios'] ?? ''}\n'
+          '${'Total'.padRight(20)}${record['carros'] ?? ''}\n', 
+          Colors.black, context),
+        
         // 🔥 "Validado" en rojo si es "Rechazado" o "Error de formación"
         _buildDataCell(
             validado ?? '',
@@ -338,15 +457,28 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             context),
 
         // 🔥 "Fecha Validado" en rojo si "Validado" es "Error de formación"
-        _buildDataCell(
-            record['fecha_validado'] ?? '',
-            validado == 'Error de formación' ? Colors.red : Colors.black,
-            context),
+        _buildCellDateString(
+            record['validado_por'] ?.toString()?? '',
+            formattedDateCell(
+              date: record['fecha_validado']?.toString() ?? '',
+              format: 'dd/MM/yyyy \n HH:mm',
+            ),
+            Colors.black,           
+            context
+        ),
 
-        _buildDataCell(record['ofrecido_por'] ?? '', Colors.black, context),
-        _buildDataCell(record['fecha_ofrecido'] ?? '', Colors.black, context),
+        //Ofrecido Por
+        _buildCellDateString(
+          record['ofrecido_por']?.toString() ?? '', 
+          formattedDateCell(
+            date: record['fecha_ofrecido']?.toString() ?? '',
+            format: 'dd/MM/yyyy \n HH:mm'
+          ), 
+          Colors.black, 
+          context
+        ),
 
-        // 🔥 "Estatus CCO" en rojo solo si es "Rechazado"
+        //"Estatus CCO" en rojo solo si es "Rechazado"
         _buildStatusCell(
           autorizado ?? 'Autorizado',
           autorizado == 'Rechazado' ? Colors.red : Colors.black,
@@ -354,13 +486,72 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           id,
         ),
 
-        // 🔥 "Fecha Autorizado" en rojo si "Estatus CCO" es "Rechazado"
-        _buildDataCell(record['fecha_autorizado'] ?? '',
-            autorizado == 'Rechazado' ? Colors.red : Colors.black, context),
 
-        _buildDataCell(record['llamado_por'] ?? '', Colors.black, context),
-        _buildDataCell(record['fecha_llamado'] ?? '', Colors.black, context),
+        // 🔥 "Fecha Autorizado" en rojo si "Estatus CCO" es "Rechazado"
+        _buildCellDateString(
+          record['autorizado_por']?.toString() ?? '', 
+          formattedDateCell(
+            date: record['fecha_autorizado']?.toString() ?? '',
+            format: 'dd/MM/yyyy \n HH:mm'
+          ), 
+          Colors.black, 
+          context
+        ),   
+
+        _buildCellDateString(
+          record['llamado_por']?.toString() ?? '', 
+          formattedDateCell(
+            date: record['fecha_llamado']?.toString() ?? '',
+            format: 'dd/MM/yyyy \n HH:mm',
+          ), 
+          Colors.black, 
+          context
+        ), 
+
+        _buildCellDateString(
+          record['llamado_por']?.toString() ?? '', 
+          formattedDateCell(
+            date: record['fecha_llamado']?.toString() ?? '',
+            format: 'dd/MM/yyyy \n HH:mm',
+          ), 
+          Colors.black, 
+          context
+        ),
+
+        buildCellExitterminal(
+          widget: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                record['fecha_salida_rc2'] != null? 'RC2 ${record['fecha_salida_rc2']}' : '',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                record['fecha_salida_lector'] != null? 'AEI ${record['fecha_salida_lector']}' : '',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),    
       ],
+    );
+  }
+
+  DataCell buildCellExitterminal({
+    required Widget widget,
+  }) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+          ],
+        ),
+      ),
     );
   }
 
@@ -407,10 +598,91 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                 color: textColor,
                 decoration:
                     text == 'Rechazado' ? TextDecoration.underline : null,
+                decorationColor: text == 'Rechazado'? Colors.red : null,
               ),
               textAlign: TextAlign.center,
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget formattedDateCell({
+      required String date,
+      String format = 'dd/MM/yyyy \n HH:mm',
+      Color textColor = Colors.black,
+    }) {
+      if (date.isEmpty) {
+        return const Text('');
+      }
+
+      try {
+        // Parsear la fecha y formatearla
+        DateTime dateTime = DateTime.parse(date);
+        String formattedDate = DateFormat(format).format(dateTime);
+
+        return Center(
+          child: Text(
+            formattedDate,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        );
+      } catch (e) {
+        return Center(
+          child: Text(
+            date,
+            style: const TextStyle(color: Colors.red),
+          ),
+        );
+      }
+    }
+
+  DataCell _buildDataCellCars(String text, Color textColor, BuildContext context){
+    return DataCell(
+      Center(
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 15.0,
+            fontWeight: FontWeight.bold,
+            color: textColor,
+          ),
+          textAlign: TextAlign.start,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildCellDateString(
+    String text,
+    Widget widget,
+    Color color,
+    BuildContext context
+  ) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            Text(
+              text,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: color,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       ),
     );
