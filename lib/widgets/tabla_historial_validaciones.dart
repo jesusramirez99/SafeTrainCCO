@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modales/motivos_rechazos_obs_id.dart';
 import 'package:safe_train_cco/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train_cco/modelos/rechazos_observaciones_data_provider.dart';
@@ -432,6 +433,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
   }
 
   DataRow _buildDataRow(Map<String, dynamic> record, BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final int id = record['ID'];
     final String? validado = record['validado'];
     final String? autorizado = record['autorizado'];
@@ -443,9 +445,9 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         _buildDataCell(record['destino'] ?? '', Colors.black, context),
         _buildDataCell(record['estacion_actual'] ?? '', Colors.black, context),
         _buildDataCellCars(
-          '${'Cargados'.padRight(15)}${record['cargados'] ?? ''}\n'
-          '${'Vacios'.padRight(18)}${record['vacios'] ?? ''}\n'
-          '${'Total'.padRight(20)}${record['carros'] ?? ''}\n', 
+          '${'Cargados'.padRight(isLaptop? 8 : 20)}${(record['cargados'] ?? '').toString().padLeft(5)}\n'
+          '${'Vacios'.padRight(isLaptop? 8 : 20)}${(record['vacios'] ?? '').toString().padLeft(8)}\n'
+          '${'Total'.padRight(isLaptop? 8 : 20)}${(record['carros'] ?? '').toString().padLeft(10)}\n', 
           Colors.black, context),
         
         // 🔥 "Validado" en rojo si es "Rechazado" o "Error de formación"
