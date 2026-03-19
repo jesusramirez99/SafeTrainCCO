@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:another_flushbar/flushbar.dart';
 import 'package:data_table_2/data_table_2.dart';
@@ -398,6 +399,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }
 
   List<DataCell> _buildCells(BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     final provider = Provider.of<TablesTrainsProvider>(context);
     final train = provider.trainData;
 
@@ -447,9 +449,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
       //_buildCell(train.destino, Colors.black),
       _buildCell(train.estacionActual, Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(20)}${(train.cargados ?? '').toString().padLeft(5)}\n'
-        '${'Vacios'.padRight(20)}${(train.vacios ?? '').toString().padLeft(8)}\n'
-        '${'Total'.padRight(20)}${(train.carros ?? '').toString().padLeft(10)}\n',
+        '${'Cargados'.padRight(isLaptop? 8 : 20)}${(train.cargados ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(isLaptop? 8 : 20)}${(train.vacios ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(isLaptop? 8 : 20)}${(train.carros ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -498,18 +500,18 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: train.autorizadorPor.toString() ?? '',
+        text: train.autorizado == 'Rechazado'? '' : train.autorizadorPor.toString(),
         widget: formattedDateCell(
-          date: train.autorizado == 'Rechazado' ? '' : train.fechaAutorizadoRechazado ?? '',
+          date: train.autorizado == 'Rechazado' ? '' : train.fechaAutorizadoRechazado,
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
 
       // Fecha Llamado
       _buildCellDateString(
-        text: train.llamadoPor.toString()?? '',
+        text: train.autorizado == 'Rechazado'? '' : train.llamadoPor.toString(),
         widget: formattedDateCell(
-          date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado ?? '',
+          date: train.autorizado == 'Rechazado' ? '' : train.fechaLlamado,
           format: 'dd/MM/yyyy \n HH:mm',
         ),
       ),
@@ -634,7 +636,16 @@ class _DataTrainTableState extends State<DataTrainTable> {
           
           return SizedBox(
             height: tableHeight.toDouble(),
-            child: DataTable2(
+            width: double.infinity,
+            child: ScrollConfiguration(
+              behavior: const MaterialScrollBehavior().copyWith(
+                dragDevices: {
+                  PointerDeviceKind.touch,
+                  PointerDeviceKind.mouse,
+                  PointerDeviceKind.trackpad,
+                }
+              ), 
+              child: DataTable2(
               headingRowHeight: headingHeight,
               dataRowHeight: rowHeight,
               horizontalMargin: 8,
@@ -654,7 +665,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
                 ),
                 cells: _buildCellsTrainStatusTrainsOffered(train),
               )).toList(),
-            ),
+            ),),
+            
           );
         },
       ),
@@ -679,6 +691,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
   }
 
   List<DataCell> _buildCellsTrainStatusTrainsOffered(Map<String, dynamic> data){
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     Provider.of<TablesTrainsProvider>(context);
     //Provider.of<TrainModel>(context, listen: false);
 
@@ -727,9 +740,9 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       _buildCell(data['estacion_actual']?.toString() ?? '', Colors.black),
       _buildCell(
-        '${'Cargados'.padRight(20)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
-        '${'Vacios'.padRight(20)}${(data['vacios'] ?? '').toString().padLeft(8)}\n'
-        '${'Total'.padRight(20)}${(data['carros'] ?? '').toString().padLeft(10)}\n',
+        '${'Cargados'.padRight(isLaptop? 10 : 15)}${(data['cargados'] ?? '').toString().padLeft(5)}\n'
+        '${'Vacios'.padRight(isLaptop? 10 : 15)}${(data['vacios'] ?? '').toString().padLeft(8)}\n'
+        '${'Total'.padRight(isLaptop? 10 : 15)}${(data['carros'] ?? '').toString().padLeft(10)}\n',
         Colors.black,
       ),
 
@@ -737,8 +750,8 @@ class _DataTrainTableState extends State<DataTrainTable> {
       _buildValidatedCell(
           data['validado']?.toString() ?? '',
           data['autorizado']?.toString() ?? '',
-          data['ofrecido_por']?.toString() ?? ''),
-
+          data['ofrecido_por']?.toString() ?? ''
+      ),
     
       // Fecha Vaidado
       _buildCellDateString(
@@ -789,7 +802,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Envio de Llamado
       _buildCellDateString(
-        text: data['autorizado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado'? '' : data['autorizado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
@@ -800,7 +813,7 @@ class _DataTrainTableState extends State<DataTrainTable> {
 
       // Fecha Llamado
       _buildCellDateString(
-        text: data['llamado_por']?.toString() ?? '', 
+        text: data['autorizado'] == 'Rechazado'? '' : data['llamado_por']?.toString() ?? '', 
         widget: data['autorizado'] == 'Rechazado'
               ? const SizedBox()
               : formattedDateCellTrainsOffered(
