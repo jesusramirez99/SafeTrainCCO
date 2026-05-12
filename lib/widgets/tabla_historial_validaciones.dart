@@ -1,14 +1,18 @@
 import 'package:another_flushbar/flushbar.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:safe_train_cco/modales/motivos_rechazos_obs_id.dart';
+import 'package:safe_train_cco/modelos/estaciones_provider.dart';
 import 'package:safe_train_cco/modelos/historico_validacion_trenes_provider.dart';
 import 'package:safe_train_cco/modelos/rechazos_observaciones_data_provider.dart';
 import 'package:safe_train_cco/modelos/user_provider.dart';
+import 'package:safe_train_cco/widgets/HoverTrainTextHistory.dart';
 import 'package:safe_train_cco/widgets/custom_date.dart';
+enum FilterType {none, day, range}
 
 class HistorialValidacionesModal extends StatefulWidget {
   final Future<void>? historialFuture;
@@ -32,21 +36,25 @@ class HistorialValidacionesModal extends StatefulWidget {
 
 class _HistorialValidacionesModalState extends State<HistorialValidacionesModal> {
   Offset _offset = Offset.zero;
-  final singleController = CustomDatePickerController();
   final rangeController  = CustomDatePickerController();
-  final ValueNotifier<bool> singleSelected = ValueNotifier(false);
-  final ValueNotifier<bool> rangeSelected = ValueNotifier(false);
   final TextEditingController controllertren = TextEditingController();
-  final TextEditingController controllerfecha = TextEditingController();
   final TextEditingController controllerestacion = TextEditingController();
+  final ValueNotifier<FilterType> selectedFilter = ValueNotifier(FilterType.none);
+  final selectedDay = ValueNotifier<String?>(null);
+  final List<String> items = ['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','29','30','31'];
+
+  @override
+  void dispose() {
+    controllertren.dispose();
+    controllerestacion.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<HistorialValidacionesProvider>(context);
     final trenProvider = Provider.of<TrenYFechaModel>(context, listen: false);
     final tren = trenProvider.trenYFecha;
-
-
 
     return FutureBuilder(
       future: widget.historialFuture ?? Future.value(), // Manejar Future null
@@ -66,6 +74,13 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
 
         final validationHistory = provider.validationHistory;
         bool isScrollable = validationHistory.isNotEmpty;
+        print('validacion: $validationHistory.isEmpty');
+
+        final validationHistoryTrain = provider.validationHistoryTrain;
+        bool isScrollableTrain = validationHistoryTrain.isNotEmpty;
+
+        final informationHistoryTrain = provider.infoHistoryTrain;
+        bool isScrollableInfoTrain = informationHistoryTrain.isNotEmpty;
 
         return Stack(
           children: [
@@ -89,9 +104,9 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Container(
-                    constraints: BoxConstraints(
-                      maxWidth: MediaQuery.of(context).size.width * 0.9,
-                      maxHeight: MediaQuery.of(context).size.height * 0.8,
+                    constraints: const BoxConstraints(
+                      maxWidth: 1405,//MediaQuery.of(context).size.width * 0.9,
+                      maxHeight: 800,//MediaQuery.of(context).size.height * 0.8,
                     ),
                     child: IntrinsicWidth(
                       stepWidth: 100.0,
@@ -103,20 +118,44 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
                           children: [
                             _buildTitle(tren ?? 'Sin Tren'),
                             const SizedBox(height: 16.0),
-                            _buildSearchBar(context, controllertren, controllerestacion, singleController, rangeController),
+                            _buildSearchBar(context, controllertren, controllerestacion, rangeController, selectedDay),
                             const SizedBox(height: 22.0),
-                            validationHistory.isNotEmpty
-                                ? Flexible(
-                                    child: _buildDataTable(
-                                        validationHistory, isScrollable, context),
-                                  )
-                                : const Center(
-                                    child: Text(
-                                      'No hay datos disponibles',
-                                      style:
-                                          TextStyle(fontSize: 16, color: Colors.grey),
+                            
+                            if (provider.isLoading)
+                              const Center(
+                                child: CircularProgressIndicator(),
+                              )
+                            else if (provider.isFilter)
+                              validationHistoryTrain.isEmpty
+                                  ? emptyMessage
+                                  : Flexible(
+                                      child: _buildDataTableFilter(
+                                        validationHistoryTrain,
+                                        isScrollableTrain,
+                                        context,
+                                      ),
+                                    )
+                            else if (provider.isConsulting)
+                              informationHistoryTrain.isEmpty
+                              ? emptyMessage
+                              : Flexible(
+                                child: _buildDataTable(
+                                  informationHistoryTrain, 
+                                  isScrollableInfoTrain, 
+                                  context,
+                                ),
+                              )
+                            else
+                              validationHistory.isEmpty
+                                  ? emptyMessage
+                                  : Flexible(
+                                      child: _buildDataTable(
+                                        validationHistory,
+                                        isScrollable,
+                                        context,
+                                      ),
                                     ),
-                                  ),
+
                             const SizedBox(height: 20.0),
                             _buildCloseButton(context),
                           ],
@@ -133,38 +172,57 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     );
   }
 
+  Widget emptyMessage = const Center(
+    child: Text(
+      'No hay datos disponibles',
+      style: TextStyle(fontSize: 16, color: Colors.grey),
+    ),
+  );
+
   Widget _buildSearchBar(
       BuildContext context,
       TextEditingController controllerTren,
       TextEditingController controllerestacion,
-      CustomDatePickerController singleController,
-      CustomDatePickerController rangeController) {
+      CustomDatePickerController rangeController,
+      ValueNotifier<String?> selectedDay) {
+      final trainProvider = Provider.of<TrenYFechaModel>(context, listen: false);
+      final trainId = trainProvider.trenYFecha;
+      final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
+      final estacionesNombres = Provider.of<EstacionesProvider>(context).estaciones
+        .map<String>((s) => s['id_estacion'] as String)
+        .toList();
     // Función para realizar la búsqueda concatenando los dos campos
     Future<void> performSearch(BuildContext context) async {
 
       final trenId = controllerTren.text.trim();
       final estacion = controllerestacion.text.trim();
-      String fecha = '';
+      String selectedDropdown = '';
+      String start = '';
+      String end = '';
 
-      if(singleController.singleDate != null){
-        fecha = DateFormat('dd').format(singleController.singleDate!);
-      }else if(rangeController.range != null){
-        final start = DateFormat('dd').format(rangeController.range!.start);
-        final end = DateFormat('dd').format(rangeController.range!.end);
-
-        fecha = '$start-$end';
+      if (selectedFilter.value == FilterType.day) {
+        selectedDropdown = selectedDay.value ?? '';
+      }
+      /// rango
+      if (selectedFilter.value == FilterType.range && rangeController.range != null) {
+        start = DateFormat('yyyy/MM/dd').format(rangeController.range!.start);
+        end = DateFormat('yyyy/MM/dd').format(rangeController.range!.end);
+      }
+      final hasRangeDate = start.isNotEmpty && end.isNotEmpty;
+      if(trenId.isEmpty && estacion.isEmpty && !hasRangeDate && selectedDropdown.isEmpty){
+        _showFlushbar(context, 'Favor de ingresar datos para la busqueda', Colors.red.shade400, );
+        return;
       }
 
-      if(trenId.isEmpty && fecha.isEmpty && estacion.isEmpty){
+      if(trenId.isEmpty){
         _showFlushbar(
           context, 
-          'Favor de ingresar al menos un dato de busqueda', 
+          'Favor de ingresar el ID Tren para la busqueda', 
           Colors.red.shade400,
         );
         return;
       }
 
-      final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
       String formattedTrenId = trenId;
       int trenIdLength = trenId.length;
 
@@ -178,68 +236,14 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         formattedTrenId = trenId; // Sin espacios
       }
 
-      final searchQuery = '$formattedTrenId$fecha$estacion';
-      print("busqueda: $searchQuery");
-      print('busqueda:'+searchQuery);
-
-      await provider.historialValidaciones(searchQuery);
-
-      if(provider.validationHistory.isEmpty){
-        _showFlushbar(
-          context, 
-          'El tren $searchQuery no existe', 
-          Colors.red.shade400,
-        );
-      }
-
-
-
-      
-
-
-      /*if (trenId.isNotEmpty && fecha.isNotEmpty) {
-        final provider = Provider.of<HistorialValidacionesProvider>(
-          context,
-          listen: false,
-        );
-
-        // Concatenar los espacios y la fecha
-        String formattedTrenId = trenId;
-        int trenIdLength = trenId.length;
-
-        if (trenIdLength == 5) {
-          formattedTrenId = '$trenId   '; // 3 espacios
-        } else if (trenIdLength == 6) {
-          formattedTrenId = '$trenId  '; // 2 espacios
-        } else if (trenIdLength == 7) {
-          formattedTrenId = '$trenId '; // 1 espacio
-        } else if (trenIdLength == 8) {
-          formattedTrenId = trenId; // Sin espacios
-        }
-
-        final searchQuery = '$formattedTrenId$fecha';
-
-        // Realiza la búsqueda de los datos del tren
-        await provider.historialValidaciones(searchQuery);
-
-        // Verifica si la lista de historial de validaciones está vacía o no
-        if (provider.validationHistory.isEmpty) {
-          _showFlushbar(
-              context,
-              'El tren $searchQuery no existe, favor de validar',
-              Colors.red.shade400);
-        }
-        return;
-      } else {
-        _showFlushbar(context, 'Favor de ingresar un tren válido y una fecha',
-            Colors.red.shade400);
-      }*/
+      final trenID = '$formattedTrenId$selectedDropdown';
+      await provider.historialValidacionTren(trenID, estacion, "", start, end);
     }
 
     return Row(
       children: [
         SizedBox(
-          width: 100,
+          width: 170,
           child: TextFormField(
             controller: controllerTren,
             onChanged: (text) {
@@ -250,7 +254,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
               );
             },
             inputFormatters: [
-              LengthLimitingTextInputFormatter(7),
+              LengthLimitingTextInputFormatter(10),
               FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
             ],
             decoration: const InputDecoration(
@@ -266,71 +270,156 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
 
         Row(
           children: [
-
-           SizedBox(
-              width: 150,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: rangeSelected,
-                builder: (_, range, __) {
-                  return CustomDatePicker(
-                    mode: PickerMode.single,
-                    label: 'Fecha',
-                    controller: singleController,
-                    enabled: !range,
-                    onSingle: (date) {
-                      singleSelected.value = date != null;
-                      if (date != null) rangeSelected.value = false;
-                    },
+            SizedBox(
+              width: 210,
+              child: ValueListenableBuilder<FilterType>(
+                valueListenable: selectedFilter,
+                builder: (_, filter, __) {
+                  final enabled = filter != FilterType.range;
+                  return DropdownButton2<String>(
+                    isExpanded: true,
+                    underline: const SizedBox(),
+                    hint: const Text(
+                      'Seleccione el día',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    items: items.map(
+                      (item) => DropdownItem<String>(
+                        value: item,
+                        height: 40,
+                        child: Text(item),
+                      ),
+                    ).toList(),
+                    valueListenable: selectedDay,
+                    onChanged: enabled ? (String? newValue) {
+                          selectedDay.value = newValue;
+                          if (newValue != null) {
+                            selectedFilter.value = FilterType.day;
+                            /// limpiar rango
+                            rangeController.clear();
+                          } else {
+                            selectedFilter.value = FilterType.none;
+                          }
+                        }
+                      : null,
+                    buttonStyleData: ButtonStyleData(
+                      height: 48,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black54),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      maxHeight: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
                   );
                 },
               ),
             ),
 
 
-        const SizedBox(width: 12.0),
+            const SizedBox(width: 12.0),
 
-        SizedBox(
-              width: 250,
-              child: ValueListenableBuilder<bool>(
-                valueListenable: singleSelected,
-                builder: (_, single, __) {
+            SizedBox(
+              width: 280,
+              child: ValueListenableBuilder<FilterType>(
+                valueListenable: selectedFilter,
+                builder: (_, filter, __) {
+                  final enabled = filter != FilterType.day;
                   return CustomDatePicker(
                     mode: PickerMode.range,
                     label: 'Periodo',
                     controller: rangeController,
-                    enabled: !single,
+                    enabled: enabled,
                     onRange: (range) {
-                      rangeSelected.value = range != null;
-                      if (range != null) singleSelected.value = false;
+                      if (range != null) {
+                        selectedFilter.value = FilterType.range;
+                        /// limpiar dropdown
+                        selectedDay.value = null;
+                      } else {
+                        selectedFilter.value = FilterType.none;
+                      }
                     },
                   );
                 },
               ),
-        ),
-          ]
+            ),
+          ],
         ),
 
         const SizedBox(width: 15.0),
 
         SizedBox(
-          width: 100,
-          child: TextFormField(
-            controller: controllerestacion,
-            onChanged: (text) {
-              final upperText = text.toUpperCase();
-              controllerestacion.value = TextEditingValue(
-                text: upperText,
-                selection: TextSelection.collapsed(offset: upperText.length),
+          width: 150,
+          child: Autocomplete<String>(
+            optionsBuilder: (TextEditingValue textEditingValue) {
+              if (textEditingValue.text.isEmpty) {
+                return const Iterable<String>.empty();
+              }
+
+              final input = textEditingValue.text.toUpperCase();
+
+              return estacionesNombres.where((option) {
+                return option.toUpperCase().contains(input);
+              });
+            },
+            onSelected: (String selection) {
+              controllerestacion.text = selection.toUpperCase();
+            },
+            fieldViewBuilder: (context, controller, focusNode, onEditingComplete) {
+              controllerestacion = controller;
+              return TextFormField(
+                controller: controller,
+                focusNode: focusNode,
+                inputFormatters: [
+                  LengthLimitingTextInputFormatter(7),
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]')),
+                ],
+                onChanged: (text) {
+                  final upperText = text.toUpperCase();
+                  controller.value = TextEditingValue(
+                    text: upperText,
+                    selection: TextSelection.collapsed(offset: upperText.length),
+                  );
+                },
+                decoration: const InputDecoration(
+                  labelText: 'Estación',
+                  border: OutlineInputBorder(),
+                ),
               );
             },
-            inputFormatters: [
-              LengthLimitingTextInputFormatter(7),
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z]'))
-            ],
-            decoration: const InputDecoration(
-              labelText: 'Estación',
-              border: OutlineInputBorder(),
-            ),
+            optionsViewBuilder: (context, onSelected, options) {
+              return Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4.0,
+                  child: SizedBox(
+                    width: 150, // 👈 MISMO WIDTH QUE EL INPUT
+                    height: 300,
+                    child: ListView.builder(
+                      padding: EdgeInsets.zero,
+                      shrinkWrap: true,
+                      itemCount: options.length,
+                      itemBuilder: (context, index) {
+                        final option = options.elementAt(index);
+                        return ListTile(
+                          title: Text(option),
+                          onTap: () => onSelected(option),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
         ),
 
@@ -344,13 +433,21 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
 
         IconButton(
           icon: const Icon(Icons.clear, color: Colors.red),
-          onPressed: () {
+          onPressed: () async {
             controllerTren.clear();
             controllerestacion.clear();
-            singleController.clear();
             rangeController.clear();
-            singleSelected.value = false;
-            rangeSelected.value = false;         
+            /// reset dropdown
+            selectedDay.value = null;
+            /// reset filtros
+            selectedFilter.value = FilterType.none;
+            provider.setQuery(false);
+            if (trainId != null && trainId.isNotEmpty) {
+              await provider.historialValidaciones(trainId);
+            } else {
+              provider.setFilter(false);
+              provider.setQuery(false);
+            }
           },
         ),
       ],
@@ -370,16 +467,147 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
     );
   }
 
-  Widget _buildDataTable(List<Map<String, dynamic>> validationHistory,
-      bool isScrollable, BuildContext context) {
+  Widget _buildDataTableFilter(List<Map<String, dynamic>> validationHistoryTrain,
+      bool isScrollableTrain, BuildContext context) {
+        final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
     return SizedBox(
-      height: 400,
+      height: 900,
       child: SingleChildScrollView(
         scrollDirection: Axis.vertical,
         child: SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
-            border: TableBorder.all(color: Colors.grey.shade300, width: 1.0),
+            border: TableBorder.all(color: Colors.grey.shade400, width: 1.0),
+            columnSpacing: 10.0,
+            dataRowHeight: 65.0,
+            headingRowColor: MaterialStateProperty.all(Colors.black),
+            columns: _buildTableHeaderstFilter(context),
+            rows: validationHistoryTrain
+                .map((data) => _buildDataRowTrain(data, context))
+                .toList(),
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<DataColumn> _buildTableHeaderstFilter(context) {
+    return [
+      _buildHeaderColumn('Tren', context),
+      _buildHeaderColumn('Estación Actual', context),
+      _buildHeaderColumn('Fecha Llamado', context),
+
+    ];
+  }
+
+  DataRow _buildDataRowTrain(Map<String, dynamic> data, BuildContext context) {
+    final isLaptop = ResponsiveBreakpoints.of(context).equals('LAPTOP');
+    final ffc = context.watch<FfccProvider>();
+
+    return DataRow(
+      cells: [
+        _buildDataCellIdTrain(
+          idTrain: data['ID_TREN'] ?? '',
+          tcn: data['TCN'] ?? '', 
+          ffc: ffc.selectedItem,
+          station: data['ESTACION'] ?? '', 
+          color: Colors.black, 
+          width: 438
+        ),
+        _buildDataCellFilter(data['ESTACION'] ?? '', Colors.black, context, width: 438),
+        _buildCellDateStringFilter(
+          SizedBox(
+            width: 438,
+            child: Center(child: Text(
+              (data['FECHA']?.toString().split(' ').first ?? ''),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            
+            ),),
+          ),
+          Colors.black, 
+          context
+        ),
+      ],
+    );
+  }
+
+  DataCell _buildDataCellIdTrain({
+    required String idTrain,
+    required String tcn,
+    required String ffc,
+    required String station,
+    Color color = Colors.black,
+    double width = 120,
+  }){
+    return DataCell(
+      SizedBox(
+        width: width,
+        child: Center(
+          child: HoverTrainTextHistory(
+            id: idTrain,
+            tcn: tcn,
+            ffc: ffc, 
+            station: station, 
+            color: color
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildDataCellFilter(String value, Color textColor, BuildContext context, {double width = 120}) {
+    return DataCell(
+      Container(
+        width: width, // Asignar el ancho específico
+        alignment: Alignment.center, // Centrar el contenido
+        color: Colors.transparent, // No color de fondo
+        child: Text(
+          value.contains('T') ? _formatDateTime(value) : value.toString(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 15.0,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildCellDateStringFilter(
+    Widget widget,
+    Color color,
+    BuildContext context
+  ) {
+    return DataCell(
+      Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Primer texto
+            widget,
+            
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDataTable(List<Map<String, dynamic>> validationHistory,
+      bool isScrollable, BuildContext context) {
+    return SizedBox(
+      height: 500,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: DataTable(
+            border: TableBorder.all(color: Colors.grey.shade400, width: 1.0),
             columnSpacing: 10.0,
             dataRowHeight: 65.0,
             headingRowColor: MaterialStateProperty.all(Colors.black),
@@ -574,17 +802,36 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
               // Guarda el ID correctamente
               idProvider.setSelectedID(trenId.toString());
               print("🔍 ID almacenado en Provider: ${idProvider.idTren}");
-
               final int? iD = idProvider.idTren;
-
               if (iD != null) {
                 await rechazosProvider.fetchHistorico(iD);
-
                 if (context.mounted) {
                   showDialog(
                     barrierDismissible: false,
                     context: context,
-                    builder: (context) => const RechazoObsTren(),
+                    builder: (context){
+                      Offset offset = const Offset(0, 0);
+                      return StatefulBuilder(
+                        builder: (context, setState){
+                          return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta;
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: const Material(
+                                color: Colors.transparent,
+                                child: RechazoObsTren(),
+                              ),
+                            ),
+                          ),  
+                        );
+                        }
+                      );
+                    },                
                   );
                 }
               }

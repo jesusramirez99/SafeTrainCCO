@@ -198,13 +198,14 @@ class MenuLateralState extends State<MenuLateral> {
         if (trainId != null && trainId.isNotEmpty) {
           historialFuture = provider.historialValidaciones(trainId);
         } else {
-          historialFuture =
-              Future.value(); // Un Future vacío para abrir el modal sin datos
+          historialFuture = Future.value();
+          provider.setFilter(false); // Un Future vacío para abrir el modal sin datos
+          provider.setQuery(false); // Un Future vacío para abrir el modal sin datos
         }
 
         // Abre el modal
         HistorialValidacionesModal.showHistorialValidacionesModal(
-          context,
+          contextdouble,
           historialFuture,
         );
       },
@@ -366,14 +367,12 @@ class MenuLateralState extends State<MenuLateral> {
 
   // METODO PARA ACTUALIAR LOS DATOS DE LA TABLA
   void _handleValidateAndRefresh() async {
-    final trenYFechaModel =
-        Provider.of<TrenYFechaModel>(context, listen: false);
+    final trenYFechaModel = Provider.of<TrenYFechaModel>(context, listen: false);
     final tren = trenYFechaModel.trenYFecha;
     final estacionProvider = Provider.of<EstacionesProvider>(context);
     final estacion = estacionProvider.selectedEstacion;
     //widget.toggleTableData();
-    Provider.of<TablesTrainsProvider>(context, listen: false)
-        .tableDataTrain(context, tren!, estacion);
+    Provider.of<TablesTrainsProvider>(context, listen: false).tableDataTrain(context, tren!, estacion);
     print("el tren en el metodo handle es: $tren");
   }
 
