@@ -184,14 +184,9 @@ class MenuLateralState extends State<MenuLateral> {
   Widget _btnHistorial(BuildContext contextdouble, fontSize, double iconText) {
     return TextButton(
       onPressed: () async {
-        final trainProvider =
-            Provider.of<TrenYFechaModel>(context, listen: false);
+        final trainProvider = Provider.of<TrenYFechaModel>(context, listen: false);
         final trainId = trainProvider.trenYFecha;
-
-        final provider = Provider.of<HistorialValidacionesProvider>(
-          context,
-          listen: false,
-        );
+        final provider = Provider.of<HistorialValidacionesProvider>(context, listen: false);
 
         // Si el trainId es nulo o vacío, simplemente manda un Future vacío sin consulta
         Future<void> historialFuture;

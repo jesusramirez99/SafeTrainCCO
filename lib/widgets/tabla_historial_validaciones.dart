@@ -86,7 +86,6 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           children: [
             Positioned.fill(
               child: GestureDetector(
-                onTap: () => Navigator.pop(context),
                 child: Container(color: Colors.black45),
               )
             ),
@@ -214,7 +213,7 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
         return;
       }
 
-      if(trenId.isEmpty){
+      if(selectedDropdown.isNotEmpty && trenId.isEmpty){
         _showFlushbar(
           context, 
           'Favor de ingresar el ID Tren para la busqueda', 
