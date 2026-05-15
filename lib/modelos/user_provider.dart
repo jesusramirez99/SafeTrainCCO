@@ -90,6 +90,10 @@ class IdTren extends ChangeNotifier {
     _idTren = newId;
     notifyListeners();
   }
+  void clearData(){
+    _idTren = 0;
+    notifyListeners();
+  }
 }
 
 // Clase para manejar el estado de Estatus CCO

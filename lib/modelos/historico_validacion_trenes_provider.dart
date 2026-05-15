@@ -175,8 +175,6 @@ class HistorialValidacionesProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
-
-
   }
 
   void setFilter(bool value) {
@@ -186,6 +184,18 @@ class HistorialValidacionesProvider with ChangeNotifier {
 
   void setQuery(bool value) {
     _isConsulting = value;
+    notifyListeners();
+  }
+
+  void clearData() {
+    _validationHistory = [];
+    _validationHistoryTrain = [];
+    _infoHistoryTrain = [];
+    _motivosRechazo = [];
+    _observaciones = "";
+    _errorMessage = null;
+    _isFilter = false;
+    _isConsulting = false;
     notifyListeners();
   }
 }

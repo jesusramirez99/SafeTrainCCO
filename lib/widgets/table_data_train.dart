@@ -230,6 +230,22 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                                 print('Error: provider.trainData es null');
                                               }
                                             } else {
+                                              final trainProvider =
+                                                    Provider.of<TrenYFechaModel>(context,
+                                                        listen: false);
+                                              final idTrenProvider = Provider.of<IdTren>(
+                                                    context,
+                                                    listen: false);
+                                              final estacionProvider =
+                                                    Provider.of<EstacionesProvider>(context,
+                                                        listen: false);
+                                              final estatusCCOProvider =
+                                                    Provider.of<EstatusCCOProvider>(context,
+                                                        listen: false);
+                                              trainProvider.clearData();
+                                              idTrenProvider.clearData();
+                                              estacionProvider.clearData();
+                                              estatusCCOProvider.limpiarEstatus();
                                               _selectedRowIndex = -1;
                                               selectionNotifier.updateSelectedRow(null);
                                             }
@@ -348,6 +364,22 @@ class _DataTrainTableState extends State<DataTrainTable> {
                                       print('Error: provider.trainData es null');
                                     }
                                   } else {
+                                    final trainProvider =
+                                          Provider.of<TrenYFechaModel>(context,
+                                              listen: false);
+                                    final idTrenProvider = Provider.of<IdTren>(
+                                          context,
+                                          listen: false);
+                                    final estacionProvider =
+                                          Provider.of<EstacionesProvider>(context,
+                                              listen: false);
+                                    final estatusCCOProvider =
+                                          Provider.of<EstatusCCOProvider>(context,
+                                              listen: false);
+                                    trainProvider.clearData();
+                                    idTrenProvider.clearData();
+                                    estacionProvider.clearData();
+                                    estatusCCOProvider.limpiarEstatus();
                                     _selectedRowIndex = -1;
                                     selectionNotifier.updateSelectedRow(null);
                                   }
