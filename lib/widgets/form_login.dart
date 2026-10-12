@@ -25,11 +25,13 @@ class _FormLoginState extends State<FormLogin> {
     if (_formKeyLogin.currentState!.validate()) {
       String user = _userController.text;
       String password = _passwordController.text;
+      String selectedItem = contextPro.read<FfccProvider>().selectedItem;
+      String aplication = 'CCO';
 
       // Llamada al método de inicio de sesión del provider
       final loginSuccess =
           await Provider.of<LoginProviderCCO>(contextPro, listen: false)
-              .login(user, password);
+              .login(user, password, aplication, selectedItem);
 
       if (loginSuccess) {
         final loginProvider =
