@@ -29,27 +29,21 @@ class _FormLoginState extends State<FormLogin> {
       String aplication = 'CCO';
 
       // Llamada al método de inicio de sesión del provider
-      final loginSuccess =
-          await Provider.of<LoginProviderCCO>(contextPro, listen: false)
-              .login(user, password, aplication, selectedItem);
+      final loginProvider = Provider.of<LoginProviderCCO>(contextPro, listen: false);
+      final loginSuccess = await loginProvider.login(user, password, aplication, selectedItem);
 
-      if (loginSuccess) {
-        final loginProvider =
-            Provider.of<LoginProviderCCO>(contextPro, listen: false);
+      if(loginSuccess){
         final region = loginProvider.regionPrincipal;
-
-        if (region != null) {
-          Provider.of<RegionProvider>(contextPro, listen: false)
-              .setRegion(region);
+        if(region != null){
+          Provider.of<RegionProvider>(contextPro, listen: false).setRegion(region);
         }
 
-        Navigator.of(contextPro).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (contextPro) => const Home()),
+        Navigator.of(contextPro).pushAndRemoveUntil(MaterialPageRoute(builder: (contextPro) => const Home()), 
           (Route<dynamic> route) => false,
         );
-      } else {
-        _showFlushbar(
-            contextPro, 'Usuario o contraseña incorrectos', Colors.red);
+      }else{
+        final error = loginProvider.errorMessage ?? 'Usuario o contraseña incorrectos';
+        _showFlushbar(contextPro, error, Colors.red);
         await Future.delayed(const Duration(seconds: 4));
         _userController.clear();
         _passwordController.clear();
