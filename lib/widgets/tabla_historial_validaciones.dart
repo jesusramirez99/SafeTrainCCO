@@ -677,13 +677,13 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
           '${'Total'.padRight(isLaptop? 8 : 20)}${(record['carros'] ?? '').toString().padLeft(10)}\n', 
           Colors.black, context),
         
-        // 🔥 "Validado" en rojo si es "Rechazado" o "Error de formación"
-        _buildDataCell(
-            validado ?? '',
-            (validado == 'Rechazado' || validado == 'Error de formación')
-                ? Colors.red
-                : Colors.black,
-            context),
+         // 🔥 "Validado" en rojo si es "Rechazado" o "Error de formación"
+        _buildValidateCell(
+          record['validado'] =='Sin Errores' ? 'Sin errores' : 'Error de formación',
+          record['validado'] == 'Sin Errores' ? Colors.green : Colors.red,
+          context,
+          record['observaciones'].toString(),
+        ),
 
         // 🔥 "Fecha Validado" en rojo si "Validado" es "Error de formación"
         _buildCellDateString(
@@ -902,6 +902,73 @@ class _HistorialValidacionesModalState extends State<HistorialValidacionesModal>
             color: textColor,
           ),
           textAlign: TextAlign.start,
+        ),
+      ),
+    );
+  }
+
+  DataCell _buildValidateCell(String text, Color textColor, BuildContext context, [String? messageObservations]) {
+
+    return DataCell(
+      MouseRegion(
+        cursor: text == 'Error de formación' ? SystemMouseCursors.click : MouseCursor.defer,
+        child: GestureDetector(
+          onTap: () async {
+            showDialog(
+                  context: context,
+                  builder: (context) {
+                    Offset offset = Offset.zero; // posición inicial
+                    return StatefulBuilder(
+                      builder: (context, setState) {
+                        //Offset offset = Offset.zero; // posición inicial
+
+                        return Center(
+                          child: GestureDetector(
+                            onPanUpdate: (details) {
+                              setState(() {
+                                offset += details.delta; // actualizar posición
+                              });
+                            },
+                            child: Transform.translate(
+                              offset: offset,
+                              child: Material(
+                                color: Colors.transparent,
+                                child: AlertDialog(
+                                  title: const Text("Observaciones"),
+                                  content: Text(
+                                    messageObservations == null || messageObservations.isEmpty
+                                        ? 'Sin observaciones'
+                                        : messageObservations,
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Cerrar"),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                );
+          },
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 15.0,
+                fontWeight: FontWeight.bold,
+                color: textColor,
+                decoration: text == 'Error de formación' ? TextDecoration.underline : null,
+                decorationColor: text == 'Error de formación' ? Colors.red : Colors.green,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ),
       ),
     );
